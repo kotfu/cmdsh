@@ -22,9 +22,10 @@
 # THE SOFTWARE.
 #
 
-import pytest
-
 import cmdsh
 
+
 def test_instantiate():
+    shell = None
     shell = cmdsh.CmdSh()
+    assert shell is not None

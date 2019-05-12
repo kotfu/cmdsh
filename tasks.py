@@ -73,6 +73,17 @@ def pylint_tests(context):
     context.run('pylint --rcfile=tests/pylintrc tests')
 namespace.add_task(pylint_tests)
 
+@invoke.task
+def flake8(context):
+    "Check code quality using flake8"
+    context.run('flake8 src/cmdsh')
+namespace.add_task(flake8)
+
+@invoke.task
+def flake8_tests(context):
+    "Check code quality of test suite using flake8"
+    context.run('flake8 tests')
+namespace.add_task(flake8_tests)
 
 #####
 #

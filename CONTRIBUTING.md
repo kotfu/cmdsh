@@ -1,10 +1,12 @@
 # Contributing
 
+
 ## Get Source Code
 
-Clone the repo from github::
-
-	$ git clone git@github.com:kotfu/cmdsh.git
+Clone the repo from github:
+```
+$ git clone git@github.com:kotfu/cmdsh.git
+```
 
 
 ## Create Python Environments
@@ -18,133 +20,149 @@ have to use [conda](https://conda.io/).
 This distribution includes a shell script `build-pyenvs.sh` which automates the creation
 of these environments.
 
-If you prefer to create these virtual envs by hand, do the following::
+If you prefer to create these virtual envs by hand, do the following:
+```
+$ cd cmdsh
+$ pyenv install 3.7.3
+$ pyenv virtualenv -p python3.7 3.7.3 cmdsh-3.7
+$ pyenv install 3.6.8
+$ pyenv virtualenv -p python3.6 3.6.8 cmdsh-3.6
+$ pyenv install 3.5.7
+$ pyenv virtualenv -p python3.5 3.5.7 cmdsh-3.5
+```
 
-    $ cd cmdsh
-    $ pyenv install 3.7.3
-    $ pyenv virtualenv -p python3.7 3.7.3 cmdsh-3.7
-    $ pyenv install 3.6.8
-    $ pyenv virtualenv -p python3.6 3.6.8 cmdsh-3.6
-    $ pyenv install 3.5.7
-    $ pyenv virtualenv -p python3.5 3.5.7 cmdsh-3.5
-
-Now set pyenv to make all three of those available at the same time::
-
-    $ pyenv local cmdsh-3.7 cmdsh-3.6 cmdsh-3.5
+Now set pyenv to make all three of those available at the same time:
+```
+$ pyenv local cmdsh-3.7 cmdsh-3.6 cmdsh-3.5
+```
 
 Whether you ran the script, or did it by hand, you now have isolated virtualenvs for each
 of the minor python versions.
 
+
 ## Install Dependencies
 
-Now install all the development dependencies::
-
-    $ pip install -e .[dev]
+Now install all the development dependencies:
+```
+$ pip install -e .[dev]
+```
 
 This installs the cmdsh package "in-place", so the package points to the source code
 instead of copying files to the python `site-packages` folder.
 
 All the dependencies now have been installed in the `cmdsh-3.7` virtualenv. If you want to
-work in other virtualenvs, you'll need to manually select it, and install again::
-
-   $ pyenv shell cmdsh-3.5
-   $ pip install -e .[dev]
+work in other virtualenvs, you'll need to manually select it, and install again:
+```
+$ pyenv shell cmdsh-3.5
+$ pip install -e .[dev]
+```
 
 
 ## Branches, Tags, and Versions
 
 This project uses a simplified version of the [git flow branching
-strategy](http://nvie.com/posts/a-successful-git-branching-model/). We
-don't use release branches, and we generally don't do hotfixes, so we
-don't have any of those branches either. The master branch always
-contains the latest release of the code uploaded to PyPI, with a tag for
-the version number of that release.
+strategy](http://nvie.com/posts/a-successful-git-branching-model/). We don't use release
+branches, and we generally don't do hotfixes, so we don't have any of those branches
+either. The master branch always contains the latest release of the code uploaded to PyPI,
+with a tag for the version number of that release.
 
-The develop branch is where all the action occurs. Feature branches are
-welcome. When it's time for a release, we merge develop into master.
+The develop branch is where all the action occurs. Feature branches are welcome. When it's
+time for a release, we merge develop into master.
 
 This project uses [semantic versioning](https://semver.org/).
 
 
 ## Invoking Common Development Tasks
 
-This project uses many other python modules for various development tasks,
-including testing, rendering documentation, and building and distributing
-releases. These modules can be configured many different ways, which can
-make it difficult to learn the specific incantations required for each
-project you are familiar with.
+This project uses many other python modules for various development tasks, including
+testing, rendering documentation, and building and distributing releases. These modules
+can be configured many different ways, which can make it difficult to learn the specific
+incantations required for each project you are familiar with.
 
-This project uses [invoke](http://www.pyinvoke.org) to provide a clean,
-high level interface for these development tasks. To see the full list of
-functions available::
+This project uses [invoke](http://www.pyinvoke.org) to provide a clean, high level
+interface for these development tasks. To see the full list of functions available:
+```
+$ invoke -l
+```
 
-   $ invoke -l
+You can run multiple tasks in a single invocation, for example:
+```
+$ invoke clean.all docs sdist wheel
+```
 
-You can run multiple tasks in a single invocation, for example::
+That one command will remove all superflous cache, testing, and build files, render the
+documentation, and build a source distribution and a wheel distribution.
 
-   $ invoke clean.all docs sdist wheel
-
-That one command will remove all superflous cache, testing, and build
-files, render the documentation, and build a source distribution and a
-wheel distribution.
-
-You probably won't need to read further in this document unless you
-want more information about the specific tools used.
+You probably won't need to read further in this document unless you want more information
+about the specific tools used.
 
 
 ## Testing
 
-You can run the tests against all the supported versions of python using tox::
-
-    $ tox
+You can run the tests against all the supported versions of python using tox:
+```
+$ invoke tox
+```
 
 tox expects that when it runs `python3.5` it will actually get a python from
 the 3.5.x series. That's why we set up the various python environments earlier.
 
 If you just want to run the tests in your current python environment, use
-pytest::
+pytest:
+```
+$ invoke pytest
+```
 
-	$ pytest
+This runs all the test in `tests/` and also runs doctests in `cmdsh/` and `docs/`.
 
-This runs all the test in `tests/` and also runs doctests in
-`cmdsh/` and `docs/`.
+You can speed up the test suite by using `pytest-xdist` to parallelize the tests across
+the number of cores you have:
+```
+$ pip install pytest-xdist
+$ pytest -n8
+```
 
-You can speed up the test suite by using `pytest-xdist` to parallelize the
-tests across the number of cores you have::
-
-    $ pip install pytest-xdist
-    $ pytest -n8
 
 ## Code Quality
 
-Use `pylint` to check code quality. There is a pylint config file for the
-tests and for the main module::
+Use `pylint` and `flake8` to check code quality. There is a pylint config file for the
+tests and for the main module.
+```
+$ pylint --rcfile=tests/pylintrc tests
+$ pylint --rcfile=cmdsh/pylintrc cmdsh
+```
 
-   $ pylint --rcfile=tests/pylintrc tests
-   $ pylint --rcfile=cmdsh/pylintrc cmdsh
+However, it's easier to use `invoke`:
+```
+$ invoke pylint pylint-tests
+$ invoke flake8 flake8-tests
+```
 
-You are welcome to use the pylint comment directives to disable certain
-messages in the code, but pull requests containing these directives will be
-carefully scrutinized.
+You are welcome to use the `pylint` and `flake8` comment directives to disable certain
+messages in the code, but pull requests containing these directives will be carefully
+scrutinized.
 
-As allowed by
-[PEP 8](https://www.python.org/dev/peps/pep-0008/#maximum-line-length)
-this project uses a nominal line length of 100 characters.
+As allowed by [PEP 8](https://www.python.org/dev/peps/pep-0008/#maximum-line-length) this
+project uses a nominal line length of 100 characters.
 
 
 ## Documentation
 
 The documentation is written in reStructured Test, and turned into HTML using
 [Sphinx](http://www.sphinx-doc.org)
-
-   $ cd docs
-   $ make html
+```
+$ cd docs
+$ make html
+```
 
 The output will be in `docs/build/html`.
 
-If you are doing a lot of documentation work, the [sphinx-autobuild](https://github.com/GaretJax/sphinx-autobuild) module has been integrated. Type:
-
-   $ invoke livehtml
+If you are doing a lot of documentation work, the
+[sphinx-autobuild](https://github.com/GaretJax/sphinx-autobuild) module has been
+integrated. Type:
+```
+$ invoke livehtml
+```
 
 Then point your browser at [http://localhost:8000](http://localhost:8000) to see the
 documentation automatically rebuilt as you save your changes.
@@ -172,16 +190,18 @@ To make a release and deploy it to [PyPI](https://pypi.python.org/pypi), do the 
 
 8. Tag the **master** branch with the new version number, and push the tag.
 
-9. Build source distribution, wheel distribution, and upload them to pypi staging::
+9. Build source distribution, wheel distribution, and upload them to pypi staging:
+```
+$ invoke pypi-test
+```
 
-    $ invoke pypi-test
-
-10. Build source distribution, wheel distribution, and upload them to pypi::
-
-    $ invoke pypi
+10. Build source distribution, wheel distribution, and upload them to pypi:
+```
+$ invoke pypi
+```
 
 11. Docs are automatically deployed to http://cmdsh.readthedocs.io/en/stable/.
    Make sure they look good.
 
 12. Switch back to the **develop** branch. Add an **Unreleased** section to
-    the top of ``CHANGELOG.md``. Push the change to github.
+    the top of `CHANGELOG.md`. Push the change to github.

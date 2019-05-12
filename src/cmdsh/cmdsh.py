@@ -28,6 +28,7 @@ cmdsh
 A python library for creating interactive language shells.
 """
 
+
 class CmdSh:
     """
     Instantiate or subclass CmdSh to create a new language shell
