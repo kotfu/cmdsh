@@ -31,6 +31,7 @@ import attr
 class CommandNotFound(Exception):
     """Raised when the user inputs a command which is not valid"""
 
+
 @attr.s(frozen=True)
 class Statement():
     """The result of parsing user input
