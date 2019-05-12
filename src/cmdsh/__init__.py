@@ -28,7 +28,8 @@ compatible with `cmd` in the standard library.
 
 from pkg_resources import get_distribution, DistributionNotFound
 
-from .cmdshell import CmdShell  # noqa F401
+from .shell import Shell  # noqa F401
+from .models import Result, CommandNotFound
 
 try:
     __version__ = get_distribution(__name__).version

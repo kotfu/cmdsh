@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2007 Jared Crapo
+# Copyright (c) 2019 Jared Crapo
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,10 +22,12 @@
 # THE SOFTWARE.
 #
 
-import cmdsh
+class CommandNotFound(Exception):
+    """Raised when the user inputs a command which is not valid"""
+    pass
 
+class Result():
+    """The result of running a command"""
 
-def test_instantiate():
-    shell = None
-    shell = cmdsh.CmdShell()
-    assert shell is not None
+    def __init__(self):
+        self.stop = False

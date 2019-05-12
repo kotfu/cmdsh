@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 Jared Crapo
+# Copyright (c) 2007 Jared Crapo
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,15 +21,31 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-"""
-cmdsh
------
 
-A python library for creating interactive language shells.
-"""
+import cmdsh
 
 
-class CmdShell:
-    """
-    Instantiate or subclass CmdSh to create a new language shell
-    """
+def test_instantiate():
+    shell = None
+    shell = cmdsh.Shell()
+    assert shell is not None
+
+def test_command_func():
+    shell = cmdsh.Shell()
+    assert shell._command_func('exit')
+
+def test_command_func_not_found():
+    shell = cmdsh.Shell()
+    assert shell._command_func('thisisnotarealcommand') == None
+
+#
+# test the loop
+#
+
+#
+# test built-in commands
+#
+def test_exit():
+    shell = cmdsh.Shell()
+    result = shell.execute('exit')
+    assert result.stop
