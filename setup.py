@@ -18,7 +18,7 @@ setup(
     name='cmdsh',
     use_scm_version=True,
 
-    description='A command line tool and python library for managing a tomcat server.',
+    description='A python library for creating interactive language shells.',
     long_description=long_description,
 
     author='Jared Crapo',

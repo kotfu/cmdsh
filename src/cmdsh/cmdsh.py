@@ -22,16 +22,14 @@
 # THE SOFTWARE.
 #
 """
-cmdsh is a library for creating line oriented command shells. It is mostly
-compatible with `cmd` in the standard library.
+cmdsh
+-----
+
+A python library for creating interactive language shells.
 """
 
-from pkg_resources import get_distribution, DistributionNotFound
-
-from .cmdsh import CmdSh
-
-try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:
-    __version__ = 'unknown'
-
+class CmdSh:
+    """
+    Instantiate or subclass CmdSh to create a new language shell
+    """
+    pass
