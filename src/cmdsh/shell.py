@@ -74,7 +74,7 @@ class Shell:
 
 
     def execute(self, line: str) -> Result:
-        """parse input and run the command, including all applicable hooks"""
+        """Parse input and run the command, including all applicable hooks"""
 
         # TODO parse line
 
@@ -82,10 +82,11 @@ class Shell:
         if func:
             result = func(line)
             return result
-        else:
-            raise CommandNotFound(line)
+
+        raise CommandNotFound(line)
 
     def _command_func(self, command) -> Optional[Callable]:
+        """Find the function to call for a given command"""
         func_name = 'do_' + command
         func = None
         try:
@@ -108,6 +109,5 @@ class Shell:
     #
     def do_exit(self, line: str) -> Result:
         """Exit the shell"""
-        result = Result()
-        result.stop = True
+        result = Result(stop=True)
         return result
