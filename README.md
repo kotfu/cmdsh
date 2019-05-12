@@ -1,4 +1,4 @@
-# cmdsh: a python library for creating interactive command line applications
+# cmdsh: A python library for creating interactive language shells
 
 
 ## Capabilities
