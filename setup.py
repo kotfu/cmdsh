@@ -54,7 +54,8 @@ setup(
     # $ pip3 install -e .[dev]
     extras_require={
         'dev': ['pytest', 'pytest-mock', 'tox',
-                'codecov', 'pytest-cov', 'pylint', 'rope',
+                'codecov', 'pytest-cov', 'pytest-xdist',
+                'pylint', 'flake8', 'rope',
                 'setuptools_scm', 'invoke',
                 'sphinx', 'sphinx-autobuild', 'wheel', 'twine'],
     },
