@@ -32,4 +32,3 @@ class CmdSh:
     """
     Instantiate or subclass CmdSh to create a new language shell
     """
-    pass

@@ -1,0 +1,5 @@
+#
+# pylint configuration for cmdsh package
+#
+#   $ pylint --rcfile=cmdsh/pylintrc cmdsh
+#
