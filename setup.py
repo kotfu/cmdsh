@@ -27,7 +27,7 @@ setup(
     license='MIT',
 
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 3 - Alpha',
         'Environment :: Console',
         'Operating System :: OS Independent',
         'Topic :: Software Development :: Libraries :: Python Modules',
