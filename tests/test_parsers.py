@@ -21,17 +21,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-"""
-cmdsh is a library for creating line oriented command shells. It is mostly
-compatible with `cmd` in the standard library.
-"""
 
-from pkg_resources import get_distribution, DistributionNotFound
+import cmdsh
 
-from .shell import Shell  # noqa F401
-from .models import Statement, Result, CommandNotFound  # noqa F401
-
-try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:
-    __version__ = 'unknown'
+def test_simple_parser():
+    parser = cmdsh.parsers.SimpleParser()
+    statement = parser.parse('command arg1 arg2 arg3')
+    assert statement.command == 'command'
+    assert statement.arglist == ['arg1','arg2','arg3']

@@ -31,8 +31,8 @@ import sys
 
 from typing import Callable, Optional
 
-from .models import Result, CommandNotFound
-
+from .models import Statement, Result, CommandNotFound
+from .parsers import SimpleParser
 
 
 # Ideas to consider:
@@ -45,6 +45,9 @@ class Shell:
     """
     Instantiate or subclass CmdSh to create a new language shell
     """
+
+    def __init__(self):
+        self.parser = SimpleParser()
 
     def loop(self) -> None:
         """Get user input, parse it, and run the commands"""
@@ -72,20 +75,19 @@ class Shell:
 
         # postloop - call registered postloop functions
 
-
     def execute(self, line: str) -> Result:
         """Parse input and run the command, including all applicable hooks"""
 
-        # TODO parse line
+        statement = self.parser.parse(line)
 
-        func = self._command_func(line)
+        func = self._command_func(statement.command)
         if func:
-            result = func(line)
+            result = func(statement)
             return result
 
         raise CommandNotFound(line)
 
-    def _command_func(self, command) -> Optional[Callable]:
+    def _command_func(self, command: str) -> Optional[Callable]:
         """Find the function to call for a given command"""
         func_name = 'do_' + command
         func = None
@@ -107,7 +109,7 @@ class Shell:
     #
     # built in commands
     #
-    def do_exit(self, line: str) -> Result:
+    def do_exit(self, statement: Statement) -> Result:
         """Exit the shell"""
         result = Result(stop=True)
         return result

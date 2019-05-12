@@ -21,17 +21,30 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
+"""Parser classes to turn user input into Statement objects
+
+You can use any class as a parser, as long is it implements the following methods:
+
+parse(self, line: str) -> Statement
+
 """
-cmdsh is a library for creating line oriented command shells. It is mostly
-compatible with `cmd` in the standard library.
-"""
 
-from pkg_resources import get_distribution, DistributionNotFound
+import shlex
 
-from .shell import Shell  # noqa F401
-from .models import Statement, Result, CommandNotFound  # noqa F401
+from .models import Statement
 
-try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:
-    __version__ = 'unknown'
+
+class SimpleParser:
+    """A simple parser which break the input input arguments by whitespace
+
+    Quoted arguments are properly handled
+    """
+
+    def parse(self, line: str) -> Statement:
+        """Split the input on whitespace"""
+        argv = shlex.split(line)
+        statement = Statement(
+            raw=line,
+            argv=argv
+        )
+        return statement
