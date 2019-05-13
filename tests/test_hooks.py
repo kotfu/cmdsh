@@ -47,11 +47,11 @@ class Plugin:
     ###
     def prepost_hook_one(self) -> None:
         """Method used for preloop or postloop hooks"""
-        self.poutput("one")
+        self.wout("one")
 
     def prepost_hook_two(self) -> None:
         """Another method used for preloop or postloop hooks"""
-        self.poutput("two")
+        self.wout("two")
 
     def prepost_hook_too_many_parameters(self, param) -> None:
         """A preloop or postloop hook with too many parameters"""
@@ -261,7 +261,7 @@ class PluggedApp(Plugin, cmdsh.Shell):
 
     def do_say(self, statement):
         """Repeat back the arguments"""
-        self.poutput(' '.join(statement.arglist))
+        self.wout(' '.join(statement.arglist))
         return cmdsh.Result()
 
 ###

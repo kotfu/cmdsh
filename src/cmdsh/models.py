@@ -28,10 +28,6 @@ from typing import List
 import attr
 
 
-class CommandNotFound(Exception):
-    """Raised when the user inputs a command which is not valid"""
-
-
 @attr.s(frozen=True)
 class Statement():
     """The result of parsing user input
@@ -84,3 +80,10 @@ class Statement():
 class Result():
     """The result of running a command"""
     stop = attr.ib(default=False, validator=attr.validators.instance_of(bool))
+
+
+class CommandNotFound(Exception):
+    """Exception when a statement parses successfully, but which contains an unknown command"""
+    def __init__(self, statement: Statement):
+        super().__init__()
+        self.statement = statement

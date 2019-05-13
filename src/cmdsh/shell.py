@@ -87,8 +87,8 @@ class Shell:
                 result = self.execute(line)
                 if result.stop:
                     break
-            except CommandNotFound:
-                self.poutput("command not found")
+            except CommandNotFound as err:
+                self.werr("{}: command not found".format(err.statement.command))
 
         # run all the registered postloop hooks
         for func in self._postloop_hooks:
@@ -106,7 +106,7 @@ class Shell:
             # run post-execute hooks
             return result
 
-        raise CommandNotFound(line)
+        raise CommandNotFound(statement)
 
     def _command_func(self, command: str) -> Optional[Callable]:
         """Find the function to call for a given command"""
@@ -160,9 +160,13 @@ class Shell:
     #
     # output handling
     #
-    def poutput(self, output: str):
-        """Print output"""
-        sys.stdout.write('{}\n'.format(output))
+    def wout(self, data: str):
+        """write data to stdout"""
+        sys.stdout.write('{}\n'.format(data))
+
+    def werr(self, data: str):
+        """write data to stderr"""
+        sys.stderr.write('{}\n'.format(data))
 
     #
     # built in commands

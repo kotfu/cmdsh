@@ -37,7 +37,7 @@ namespace.add_collection(namespace_clean, 'clean')
 @invoke.task
 def pytest(context):
     "Run tests and code coverage using pytest"
-    context.run("pytest --cov=cmdsh")
+    context.run("pytest --cov-report term-missing --cov=cmdsh")
 namespace.add_task(pytest)
 
 @invoke.task

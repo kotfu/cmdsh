@@ -22,32 +22,63 @@
 # THE SOFTWARE.
 #
 
+import pytest
+
 import cmdsh
+from cmdsh.models import CommandNotFound
 
 
-def test_instantiate():
-    shell = None
-    shell = cmdsh.Shell()
-    assert shell is not None
+INVALID_COMMAND = 'thisisnotacommand'
 
-def test_command_func():
-    shell = cmdsh.Shell()
+#
+# fixtures
+#
+@pytest.fixture
+def shell():
+    return cmdsh.Shell()
+
+#
+# tests
+#
+def test_command_func(shell):
     assert shell._command_func('exit')
 
-def test_command_func_not_found():
-    shell = cmdsh.Shell()
-    assert shell._command_func('thisisnotarealcommand') == None
+def test_command_func_not_found(shell):
+    assert not shell._command_func(INVALID_COMMAND)
+
+def test_command_func_attribute(shell):
+    shell.do_attribute = True
+    assert not shell._command_func('attribute')
 
 #
 # test the loop
 #
 def test_cmdqueue():
     # TODO
+    pass
 
 #
-# test built-in commands
+# test built-in commands and behavior
 #
-def test_exit():
-    shell = cmdsh.Shell()
+def test_empty_input_no_output(shell, capsys):
+    shell.cmdqueue.append('')
+    shell.cmdqueue.append('exit')
+    shell.cmdloop()
+    out, err = capsys.readouterr()
+    assert not out
+    assert not err
+
+def test_command_not_found_execute(shell):
+    with pytest.raises(CommandNotFound):
+        result = shell.execute(INVALID_COMMAND)
+
+def test_command_not_found_errmsg(shell, capsys):
+    shell.cmdqueue.append(INVALID_COMMAND)
+    shell.cmdqueue.append('exit')
+    shell.cmdloop()
+    out, err = capsys.readouterr()
+    assert 'command not found' in err
+
+def test_exit(shell):
     result = shell.execute('exit')
     assert result.stop

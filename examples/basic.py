@@ -4,4 +4,4 @@
 import cmdsh
 
 shell = cmdsh.Shell()
-shell.loop()
+shell.cmdloop()

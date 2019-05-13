@@ -29,7 +29,7 @@ compatible with `cmd` in the standard library.
 from pkg_resources import get_distribution, DistributionNotFound
 
 from .shell import Shell  # noqa F401
-from .models import Statement, Result, CommandNotFound  # noqa F401
+from .models import Statement, Result  # noqa F401
 
 try:
     __version__ = get_distribution(__name__).version
