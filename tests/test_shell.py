@@ -95,11 +95,13 @@ def test_command_no_returned_result(talker):
     # we want to make sure that cmdsh creates a default one
     result = talker.execute('say hello')
     assert result
+    assert not result.stop
+    assert result.exit_code == 0
 
 
 def test_command_not_found_execute(shell):
     with pytest.raises(CommandNotFound):
-        result = shell.execute(INVALID_COMMAND)  # noqa F841
+        shell.execute(INVALID_COMMAND)
 
 
 def test_command_not_found_errmsg(shell, capsys):
@@ -113,3 +115,4 @@ def test_command_not_found_errmsg(shell, capsys):
 def test_exit(shell):
     result = shell.execute('exit')
     assert result.stop
+    assert result.exit_code == 0

@@ -79,6 +79,7 @@ class Statement():
 @attr.s(frozen=True)
 class Result():
     """The result of running a command"""
+    exit_code = attr.ib(default=0, validator=attr.validators.instance_of(int))
     stop = attr.ib(default=False, validator=attr.validators.instance_of(bool))
 
 
