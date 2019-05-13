@@ -17,5 +17,6 @@ Table of Contents
    :maxdepth: 2
 
    terminology
+   commandloop
    contributing
    changelog
