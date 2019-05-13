@@ -41,6 +41,8 @@ def test_command_func_not_found():
 #
 # test the loop
 #
+def test_cmdqueue():
+    # TODO
 
 #
 # test built-in commands

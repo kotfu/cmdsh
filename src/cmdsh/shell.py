@@ -27,6 +27,7 @@ cmdsh
 
 A python library for creating interactive language shells.
 """
+import inspect
 import sys
 
 from typing import Callable, Optional
@@ -37,28 +38,46 @@ from .parsers import SimpleParser
 
 # Ideas to consider:
 #
-#   - command queue, get input pops from the queue if there is anything present
 #   - prompt class - count commands, allow variable interpolation
 #
 
 class Shell:
     """
-    Instantiate or subclass CmdSh to create a new language shell
+    Instantiate or subclass Shell to create a new language shell
+
+    Attributes:
+
+    cmdqueue
+        a list of commands. The cmdloop pops items from this list before reading stdin
+    parser
+        the parser class to use to parse input into a Statement object
     """
 
     def __init__(self):
+        # hooks
+        self._preloop_hooks = []
+        self._postloop_hooks = []
+        self.cmdqueue = []
+        # parser
         self.parser = SimpleParser()
 
-    def loop(self) -> None:
+    def cmdloop(self) -> None:
         """Get user input, parse it, and run the commands"""
 
-        # preloop - call registered preloop functions
+        # run all the registered preloop hooks
+        for func in self._preloop_hooks:
+            func()
 
+        # enter the command loop
         while True:
-            try:
-                line = input("cmdsh: ")
-            except EOFError:
-                break
+            if self.cmdqueue:
+                # we have enqueued commands, use the first one
+                line = self.cmdqueue.pop(0)
+            else:
+                try:
+                    line = input("cmdsh: ")
+                except EOFError:
+                    break
 
             if line == '':
                 continue
@@ -73,7 +92,9 @@ class Shell:
             except CommandNotFound:
                 self.poutput("command not found")
 
-        # postloop - call registered postloop functions
+        # run all the registered postloop hooks
+        for func in self._postloop_hooks:
+            func()
 
     def execute(self, line: str) -> Result:
         """Parse input and run the command, including all applicable hooks"""
@@ -98,6 +119,43 @@ class Shell:
         except AttributeError:
             pass
         return func
+
+    #
+    # hooks
+    #
+    @classmethod
+    def _validate_callable_param_count(cls, func: Callable, count: int) -> None:
+        """Ensure a function has the given number of parameters."""
+        signature = inspect.signature(func)
+        # validate that the callable has the right number of parameters
+        nparam = len(signature.parameters)
+        if nparam != count:
+            raise TypeError('{} has {} positional arguments, expected {}'.format(
+                func.__name__,
+                nparam,
+                count,
+            ))
+
+    @classmethod
+    def _validate_prepostloop_callable(cls, func: Callable[[None], None]) -> None:
+        """Check parameter and return types for preloop and postloop hooks."""
+        cls._validate_callable_param_count(func, 0)
+        # make sure there is no return notation
+        signature = inspect.signature(func)
+        if signature.return_annotation is not None:
+            raise TypeError("{} must declare return a return type of 'None'".format(
+                func.__name__,
+            ))
+
+    def register_preloop_hook(self, func: Callable[[None], None]) -> None:
+        """Register a function to be called before the command loop starts."""
+        self._validate_prepostloop_callable(func)
+        self._preloop_hooks.append(func)
+
+    def register_postloop_hook(self, func: Callable[[None], None]) -> None:
+        """Register a function to be called after the command loop finishes."""
+        self._validate_prepostloop_callable(func)
+        self._postloop_hooks.append(func)
 
     #
     # output handling
