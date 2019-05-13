@@ -25,9 +25,11 @@ import pytest
 
 import cmdsh
 
+
 @pytest.fixture
 def empty_statement():
     return cmdsh.Statement()
+
 
 @pytest.fixture
 def basic_statement():
@@ -37,14 +39,18 @@ def basic_statement():
     )
     return statement
 
+
 def test_statement_command_empty(empty_statement):
     assert empty_statement.command == ''
+
 
 def test_statement_command(basic_statement):
     assert basic_statement.command == 'command'
 
+
 def test_statement_args_empty(empty_statement):
     assert empty_statement.arglist == []
+
 
 def test_statement_args(basic_statement):
     assert basic_statement.arglist == ['arg1', 'arg2', 'arg3']

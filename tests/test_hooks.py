@@ -26,6 +26,7 @@ import pytest
 
 import cmdsh
 
+
 class Plugin:
     """A mixin class for testing hook registration and calling"""
     def __init__(self, *args, **kwargs):
@@ -55,11 +56,9 @@ class Plugin:
 
     def prepost_hook_too_many_parameters(self, param) -> None:
         """A preloop or postloop hook with too many parameters"""
-        pass
 
     def prepost_hook_with_wrong_return_annotation(self) -> bool:
         """A preloop or postloop hook with incorrect return type"""
-        pass
 
     # ###
     # #
@@ -256,13 +255,11 @@ class Plugin:
 
 class PluggedApp(Plugin, cmdsh.Shell):
     """A sample app with a plugin mixed in"""
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     def do_say(self, statement):
         """Repeat back the arguments"""
         self.wout(' '.join(statement.arglist))
         return cmdsh.Result()
+
 
 ###
 #
@@ -274,10 +271,12 @@ def test_register_preloop_hook_too_many_parameters():
     with pytest.raises(TypeError):
         app.register_preloop_hook(app.prepost_hook_too_many_parameters)
 
+
 def test_register_preloop_hook_with_return_annotation():
     app = PluggedApp()
     with pytest.raises(TypeError):
         app.register_preloop_hook(app.prepost_hook_with_wrong_return_annotation)
+
 
 def test_preloop_hook(capsys):
     app = PluggedApp()
@@ -288,6 +287,7 @@ def test_preloop_hook(capsys):
     out, err = capsys.readouterr()
     assert out == 'one\nhello\n'
     assert not err
+
 
 def test_preloop_hooks(capsys):
     app = PluggedApp()
@@ -300,15 +300,18 @@ def test_preloop_hooks(capsys):
     assert out == 'one\ntwo\nhello\n'
     assert not err
 
+
 def test_register_postloop_hook_too_many_parameters():
     app = PluggedApp()
     with pytest.raises(TypeError):
         app.register_postloop_hook(app.prepost_hook_too_many_parameters)
 
+
 def test_register_postloop_hook_with_wrong_return_annotation():
     app = PluggedApp()
     with pytest.raises(TypeError):
         app.register_postloop_hook(app.prepost_hook_with_wrong_return_annotation)
+
 
 def test_postloop_hook(capsys):
     app = PluggedApp()
@@ -319,6 +322,7 @@ def test_postloop_hook(capsys):
     out, err = capsys.readouterr()
     assert out == 'hello\none\n'
     assert not err
+
 
 def test_postloop_hooks(capsys):
     app = PluggedApp()

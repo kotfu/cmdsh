@@ -64,26 +64,19 @@ namespace_clean.add_task(tox_clean, 'tox')
 @invoke.task
 def pylint(context):
     "Check code quality using pylint"
-    context.run('pylint --rcfile=src/cmdsh/pylintrc src/cmdsh')
+    print('\nlinting src/cmdsh')
+    context.run('pylint --rcfile=src/cmdsh/pylintrc src/cmdsh', warn=True)
+    print('\nlinting tests')
+    context.run('pylint --rcfile=tests/pylintrc tests', warn=True)
+    print('\nlinting examples')
+    context.run('pylint examples', warn=True)
 namespace.add_task(pylint)
-
-@invoke.task
-def pylint_tests(context):
-    "Check code quality of test suite using pylint"
-    context.run('pylint --rcfile=tests/pylintrc tests')
-namespace.add_task(pylint_tests)
 
 @invoke.task
 def flake8(context):
     "Check code quality using flake8"
-    context.run('flake8 src/cmdsh')
+    context.run('flake8 src/cmdsh tests examples')
 namespace.add_task(flake8)
-
-@invoke.task
-def flake8_tests(context):
-    "Check code quality of test suite using flake8"
-    context.run('flake8 tests')
-namespace.add_task(flake8_tests)
 
 #####
 #

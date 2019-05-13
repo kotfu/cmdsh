@@ -47,10 +47,14 @@ class Shell:
 
     Attributes:
 
-    cmdqueue
-        a list of commands. The cmdloop pops items from this list before reading stdin
-    parser
-        the parser class to use to parse input into a Statement object
+    cmdqueue a list of commands. The cmdloop pops items from this list before reading
+        stdin parser the parser class to use to parse input into a Statement object
+
+    Methods and attributes on this class which don't start with an underscore are
+    considered part of the public api of this class. Changes to these methods and
+    attributes are reflected in the version number according to `Semantic Versioning
+    <https://semver.org>`_.
+
     """
 
     def __init__(self):
@@ -60,6 +64,7 @@ class Shell:
         # public attributes get sensible defaults
         self.cmdqueue = []
         self.parser = SimpleParser()
+        self.prompt = 'cmdsh: '
 
     def cmdloop(self) -> None:
         """Get user input, parse it, and run the commands"""
@@ -75,7 +80,7 @@ class Shell:
                 line = self.cmdqueue.pop(0)
             else:
                 try:
-                    line = input("cmdsh: ")
+                    line = input(self.render_prompt())
                 except EOFError:
                     break
 
@@ -96,14 +101,15 @@ class Shell:
 
     def execute(self, line: str) -> Result:
         """Parse input and run the command, including all applicable hooks"""
-
         statement = self.parser.parse(line)
-
         func = self._command_func(statement.command)
         if func:
             # run pre-execute hooks
             result = func(statement)
             # run post-execute hooks
+            if not result:
+                # they didn't return a result, so let's create the default one
+                result = Result()
             return result
 
         raise CommandNotFound(statement)
@@ -160,13 +166,21 @@ class Shell:
     #
     # output handling
     #
-    def wout(self, data: str):
+    def wout(self, data: str) -> None:
         """write data to stdout"""
         sys.stdout.write('{}\n'.format(data))
 
-    def werr(self, data: str):
+    def werr(self, data: str) -> None:
         """write data to stderr"""
         sys.stderr.write('{}\n'.format(data))
+
+    def render_prompt(self) -> str:
+        """Generate the prompt which is displayed before user input.
+
+        Rather than access the prompt attribute directly, we call this method so that
+        subclasses can over-ride it to create a dynamic prompt.
+        """
+        return self.prompt
 
     #
     # built in commands

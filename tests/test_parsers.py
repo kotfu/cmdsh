@@ -24,8 +24,9 @@
 
 import cmdsh
 
+
 def test_simple_parser():
     parser = cmdsh.parsers.SimpleParser()
     statement = parser.parse('command arg1 arg2 arg3')
     assert statement.command == 'command'
-    assert statement.arglist == ['arg1','arg2','arg3']
+    assert statement.arglist == ['arg1', 'arg2', 'arg3']

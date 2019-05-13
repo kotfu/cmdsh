@@ -9,8 +9,8 @@
 good-names=r,ta,fd,do_GET,do_PUT
 
 # allow for longer method and function names
-method-rgx=(([a-z][a-z0-9_]{2,50})|(_[a-z0-9_]*))$
-function-rgx=(([a-z][a-z0-9_]{2,50})|(_[a-z0-9_]*))$
+method-rgx=(([a-z][a-z0-9_]{2,70})|(_[a-z0-9_]*))$
+function-rgx=(([a-z][a-z0-9_]{2,70})|(_[a-z0-9_]*))$
 
 [messages control]
 # too-many-public-methods -> test classes can have lots of methods, so let's ignore those
