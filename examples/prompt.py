@@ -3,6 +3,7 @@
 """An example of a command shell with dynamically generated prompt"""
 
 import datetime
+import sys
 
 import cmdsh
 
@@ -30,7 +31,9 @@ class App(cmdsh.Shell):
 def main():
     """instantiate and launch the application"""
     app = App()
-    app.cmdloop()
+    last_result = app.cmdloop()
+    return last_result.exit_code
 
-if '__name__' == '__main__':
-    main()
+
+if __name__ == "__main__":
+    sys.exit(main())

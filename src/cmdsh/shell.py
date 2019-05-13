@@ -66,8 +66,14 @@ class Shell:
         self.parser = SimpleParser()
         self.prompt = 'cmdsh: '
 
-    def cmdloop(self) -> None:
-        """Get user input, parse it, and run the commands"""
+    def cmdloop(self) -> Result:
+        """Get user input, parse it, and run the commands
+
+        Returns the result of the last command
+        """
+
+        # set a default result in case we exit before generating an actual result
+        result = Result(exit_code=0, stop=True)
 
         # run all the registered preloop hooks
         for func in self._preloop_hooks:
@@ -98,6 +104,8 @@ class Shell:
         # run all the registered postloop hooks
         for func in self._postloop_hooks:
             func()
+
+        return result
 
     def execute(self, line: str) -> Result:
         """Parse input and run the command, including all applicable hooks"""
@@ -187,5 +195,4 @@ class Shell:
     #
     def do_exit(self, statement: Statement) -> Result:
         """Exit the shell"""
-        result = Result(stop=True)
-        return result
+        return Result(exit_code=0, stop=True)

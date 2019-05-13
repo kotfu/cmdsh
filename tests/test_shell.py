@@ -23,28 +23,10 @@
 
 import pytest
 
-import cmdsh
 from cmdsh.models import CommandNotFound
 
 
 INVALID_COMMAND = 'thisisnotacommand'
-
-#
-# fixtures
-#
-@pytest.fixture
-def shell():
-    return cmdsh.Shell()
-
-
-class Talker(cmdsh.Shell):
-    def do_say(self, statement):
-        self.wout(' '.join(statement.arglist))
-
-
-@pytest.fixture
-def talker():
-    return Talker()
 
 
 #
@@ -81,13 +63,34 @@ def test_custom_prompt(shell):
 #
 # test built-in commands and command loop related behavior
 #
+def test_mocked_input(shell, mocker):
+    """test typed input by mocking up the input call"""
+    mock_input = mocker.patch('builtins.input', return_value='exit')
+    last_result = shell.cmdloop()
+    assert last_result.stop
+    assert last_result.exit_code == 0
+    assert mock_input.call_count == 1
+
+
+def test_mocked_input_eof(shell, mocker):
+    """test EOF as typed input by mocking up the input call"""
+    mock_input = mocker.patch('builtins.input')
+    mock_input.side_effect = EOFError()
+    last_result = shell.cmdloop()
+    assert last_result.stop
+    assert last_result.exit_code == 0
+    assert mock_input.call_count == 1
+
+
 def test_empty_input_no_output(shell, capsys):
     shell.cmdqueue.append('')
     shell.cmdqueue.append('exit')
-    shell.cmdloop()
+    last_result = shell.cmdloop()
     out, err = capsys.readouterr()
     assert not out
     assert not err
+    assert last_result.stop
+    assert last_result.exit_code == 0
 
 
 def test_command_no_returned_result(talker):

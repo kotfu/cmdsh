@@ -7,6 +7,8 @@ try this out by
 $ echo "say hello there" | python stdin.py
 """
 
+import sys
+
 import cmdsh
 
 
@@ -25,7 +27,9 @@ class Shell(cmdsh.Shell):
 def main():
     """instantiate and launch the application"""
     shell = Shell()
-    shell.cmdloop()
+    last_result = shell.cmdloop()
+    return last_result.exit_code
 
-if '__name__' == '__main__':
-    main()
+
+if __name__ == "__main__":
+    sys.exit(main())
