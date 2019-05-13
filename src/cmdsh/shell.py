@@ -57,8 +57,8 @@ class Shell:
         # hooks
         self._preloop_hooks = []
         self._postloop_hooks = []
+        # public attributes get sensible defaults
         self.cmdqueue = []
-        # parser
         self.parser = SimpleParser()
 
     def cmdloop(self) -> None:
@@ -84,9 +84,7 @@ class Shell:
 
             # Run the command along with all associated pre and post hooks
             try:
-                # run pre-execute hooks
                 result = self.execute(line)
-                # run post-execute hooks
                 if result.stop:
                     break
             except CommandNotFound:
@@ -103,7 +101,9 @@ class Shell:
 
         func = self._command_func(statement.command)
         if func:
+            # run pre-execute hooks
             result = func(statement)
+            # run post-execute hooks
             return result
 
         raise CommandNotFound(line)
