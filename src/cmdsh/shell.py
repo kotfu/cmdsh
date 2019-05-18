@@ -33,13 +33,8 @@ import sys
 from typing import Callable, Optional
 
 from .models import Statement, Result, CommandNotFound
-from .parsers import SimpleParser
+from .personalities import StandardLibraryPersonality
 
-
-# Ideas to consider:
-#
-#   - prompt class - count commands, allow variable interpolation
-#
 
 class Shell:
     """
@@ -57,13 +52,13 @@ class Shell:
 
     """
 
-    def __init__(self):
+    def __init__(self, personality=StandardLibraryPersonality()):
         # hooks
         self._preloop_hooks = []
         self._postloop_hooks = []
         # public attributes get sensible defaults
         self.cmdqueue = []
-        self.parser = SimpleParser()
+        self.personality = personality
         self.prompt = 'cmdsh: '
 
     def cmdloop(self) -> Result:
@@ -109,7 +104,7 @@ class Shell:
 
     def execute(self, line: str) -> Result:
         """Parse input and run the command, including all applicable hooks"""
-        statement = self.parser.parse(line)
+        statement = self.personality.parser.parse(line)
         func = self._command_func(statement.command)
         if func:
             # run pre-execute hooks
