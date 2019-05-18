@@ -58,8 +58,10 @@ class Shell:
         self._postloop_hooks = []
         # public attributes get sensible defaults
         self.cmdqueue = []
-        self.personality = personality
         self.prompt = 'cmdsh: '
+        # set and bind the personality
+        self.personality = personality
+        self.personality.bind(self)
 
     def cmdloop(self) -> Result:
         """Get user input, parse it, and run the commands

@@ -21,58 +21,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-"""A personality provides a container for all command shell classes and settings
-
-It must provide the following methods and attributes:
-
-parser - a parser as defined in parsers.py
-
-"""
 
 import types
 
-from .parsers import SimpleParser
+import cmdsh
 
 
-#
-# bound methods
-#
-# def render_prompt(self) -> str:
-#     """attempt to dynamically bind a method to the class"""
-#     return '{}render: '.format(self.prompt)
-
-
-class StandardLibraryPersonality:
-    """Closely (but not perfectly) emulates the behavior of the standard library"""
+class Personality():
     def __init__(self):
-        self.parser = SimpleParser()
+        self.parser = cmdsh.parsers.SimpleParser()
 
     def bind(self, shell):
-        """The shell calls this method and passes itself in so that we can
-        do any dynamic binding we want
-
-        Any methods on this class that you bind to shell will have shell as
-        self when they are called
-
-
-        """
-
-        # to bind a bare function to the shell, use this incantation
-        # shell.render_prompt = types.MethodType(render_prompt, shell)
-
-        # this is the incantation that binds a method from an instance of
-        # the personality to the instance of the shell
+        """bind methods to the shell"""
         shell.render_prompt = types.MethodType(self.render_prompt.__func__, shell)
 
-        # once the methods are bound to the shell, you can register them with any hooks
-
-    #
     # bound methods
-    #
-    # these methods end up bound to the shell, not to the personality
-    # they are mixed in dynamically by the bind() method, which the shell
-    # calls on initialization
     def render_prompt(self) -> str:
         """attempt to dynamically bind"""
         # pylint: disable=no-member
-        return '{}'.format(self.prompt)
+        return '{}render: '.format(self.prompt)
+
+
+def test_bind():
+    flavor = Personality()
+    shell = cmdsh.Shell(personality=flavor)
+    shell.prompt = 'hi:'
+    assert shell.render_prompt() == 'hi:render: '

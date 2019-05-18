@@ -31,6 +31,7 @@ def test_simple_parser():
     assert statement.command == 'command'
     assert statement.arglist == ['arg1', 'arg2', 'arg3']
 
+
 def test_posix_parser():
     parser = cmdsh.parsers.PosixShellParser()
     statement = parser.parse('command "arg1 arg2" arg3 # not args')
