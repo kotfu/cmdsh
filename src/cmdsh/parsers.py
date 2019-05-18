@@ -35,14 +35,33 @@ from .models import Statement
 
 
 class SimpleParser:
-    """A simple parser which break the input input arguments by whitespace
+    """A simple parser which break the input arguments by whitespace
 
     Quoted arguments are properly handled
     """
 
     def parse(self, line: str) -> Statement:
         """Split the input on whitespace"""
-        argv = shlex.split(line)
+        argv = list(shlex.shlex(line, posix=False))
+        statement = Statement(
+            raw=line,
+            argv=argv
+        )
+        return statement
+
+
+class PosixShellParser:
+    """Parse using POSIX shell rules
+
+    - Quoted strings are properly handled, but
+    - Quotes do not separate words
+    - Escape sequences are interpreted
+    - Everything after an unquoted/unescaped # is treated as a comment
+    """
+
+    def parse(self, line: str) -> Statement:
+        """Posix split the input"""
+        argv = list(shlex.shlex(line, posix=True, punctuation_chars=True))
         statement = Statement(
             raw=line,
             argv=argv
