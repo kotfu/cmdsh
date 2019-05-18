@@ -53,15 +53,17 @@ class Shell:
     """
 
     def __init__(self, personality=StandardLibraryPersonality()):
-        # hooks
+        # initialize private variables
         self._preloop_hooks = []
         self._postloop_hooks = []
+
         # public attributes get sensible defaults
         self.cmdqueue = []
         self.prompt = 'cmdsh: '
+
         # set and bind the personality
-        self.personality = personality
-        self.personality.bind(self)
+        self._personality = personality
+        self._personality.bind(self)
 
     def cmdloop(self) -> Result:
         """Get user input, parse it, and run the commands
@@ -106,7 +108,7 @@ class Shell:
 
     def execute(self, line: str) -> Result:
         """Parse input and run the command, including all applicable hooks"""
-        statement = self.personality.parser.parse(line)
+        statement = self._personality.parser.parse(line)
         func = self._command_func(statement.command)
         if func:
             # run pre-execute hooks
