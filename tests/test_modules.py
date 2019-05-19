@@ -21,37 +21,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-"""Modules are dynamically loaded into an instantiated shell to add
-additional functionality.
-"""
-
-import types
+import pytest
 
 import cmdsh
 
+class DefaultResultApp(cmdsh.Shell):
+    """A simple app to rest the DefaultResult module"""
 
-class DefaultResult:
-    """Create a default result if a do_command() method doesn't return one"""
-    allow_multiple_loads = False
+    def do_say(self, statement: cmdsh.Statement) -> cmdsh.Result:
+        """Repeat back the arguments"""
+        self.wout(' '.join(statement.arglist))
+        # don't return anything here
+        # we want to see if the module will do it for us
 
-    def load(self, shell):
-        """Load and iniitalize this module"""
+def test_no_result():
+    drapp = DefaultResultApp()
+    result = drapp.do('say hello')
+    assert result is None
 
-        # this is the incantation that binds a method from an instance of
-        # the module to an instance of the shell
-        shell._default_result_hook = types.MethodType(self._default_result_hook.__func__, shell)
-        shell.register_postexecute_hook(shell._default_result_hook)
-
-    #
-    # bound methods
-    #
-    # these methods end up bound to the shell, not to the module
-    def _default_result_hook(
-            self,
-            statement: cmdsh.Statement,
-            result: cmdsh.Result,
-    ) -> cmdsh.Result:
-        """Generate a default result if one was not generated"""
-        if not result:
-            result = cmdsh.Result(exit_code=0, stop=False)
-        return result
+def test_default_result():
+    drapp = DefaultResultApp()
+    drmod = cmdsh.modules.DefaultResult()
+    drapp.load_module(drmod)
+    result = drapp.do('say hello')
+    assert result
+    assert result.exit_code == 0
+    assert result.stop == False

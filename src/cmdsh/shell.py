@@ -121,11 +121,8 @@ class Shell:
             result = func(statement)
 
             for func in self._postexecute_hooks:
-                func(statement, result)
+                result = func(statement, result)
 
-            if not result:
-                # they didn't return a result, so let's create the default one
-                result = Result()
             return result
         raise CommandNotFound(statement)
 
@@ -140,6 +137,13 @@ class Shell:
         except AttributeError:
             pass
         return func
+
+    #
+    # modules
+    #
+    def load_module(self, module) -> None:
+        """Load an instantiated module object"""
+        module.load(self)
 
     #
     # hooks
@@ -204,7 +208,7 @@ class Shell:
                 func.__name__
             ))
 
-    def register_postexecute_hook(self, func: Callable[[None], None]) -> None:
+    def register_postexecute_hook(self, func: Callable[[Statement, Result], Result]) -> None:
         """Register a function to be called after command execution completes."""
         self._validate_postexecute_callable(func)
         self._postexecute_hooks.append(func)

@@ -95,11 +95,8 @@ def test_empty_input_no_output(shell, capsys):
 
 def test_command_no_returned_result(talker):
     # the say command in the talker app doesn't return a result
-    # we want to make sure that cmdsh creates a default one
     result = talker.do('say hello')
-    assert result
-    assert not result.stop
-    assert result.exit_code == 0
+    assert result is None
 
 
 def test_command_not_found_do(shell):
