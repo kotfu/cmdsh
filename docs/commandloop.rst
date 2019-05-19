@@ -31,12 +31,13 @@ register a preloop hook::
 Command Loop Details
 --------------------
 
-Here's the specific steps that occur in the command loop:
+Here's the specific steps that occur each time through the command loop:
 
 #. Output the prompt
 #. Read input
 #. Parse input into a ``Statement`` object
 #. Call ``do_command`` method
+#. Call all registered post-execute hooks
 
 
 Postloop Hooks
