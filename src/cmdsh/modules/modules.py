@@ -40,6 +40,7 @@ class DefaultResult:
         # this is the incantation that binds a method from an instance of
         # the module to an instance of the shell
         shell._default_result_hook = types.MethodType(self._default_result_hook.__func__, shell)
+        # register the hook we just added to the shell
         shell.register_postexecute_hook(shell._default_result_hook)
 
     #
@@ -55,3 +56,22 @@ class DefaultResult:
         if not result:
             result = cmdsh.Result(exit_code=0, stop=False)
         return result
+
+
+class ExitCommand:
+    """Add an exit command to a shell"""
+    allow_multiple_loads = False
+
+    def load(self, shell):
+        """Load and initialize this module"""
+        # this is the incantation that binds a method from an instance of
+        # the module to an instance of the shell
+        shell.do_exit = types.MethodType(self.do_exit.__func__, shell)
+
+    #
+    # bound methods
+    #
+    # these methods end up bound to the shell, not to the module
+    def do_exit(self, statement: cmdsh.Statement) -> cmdsh.Result:
+        """Exit the shell"""
+        return cmdsh.Result(exit_code=0, stop=True)

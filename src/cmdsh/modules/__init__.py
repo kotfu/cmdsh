@@ -25,4 +25,4 @@
 The modules package includes
 """
 
-from .modules import DefaultResult
+from .modules import DefaultResult, ExitCommand

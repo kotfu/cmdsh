@@ -138,44 +138,48 @@ class SayApp(cmdsh.Shell):
         return statement
 
 
+@pytest.fixture
+def sayapp():
+    app = SayApp()
+    exit_command = cmdsh.modules.ExitCommand()
+    app.load_module(exit_command)
+    return app
+
+
 ###
 #
 # test preloop hooks
 #
 ###
-def test_preloop_hook(capsys):
-    app = SayApp()
-    app.register_preloop_hook(app.prepost_hook_one)
-    app.cmdqueue.append('say hello')
-    app.cmdqueue.append('exit')
-    app.loop()
+def test_preloop_hook(sayapp, capsys):
+    sayapp.register_preloop_hook(sayapp.prepost_hook_one)
+    sayapp.cmdqueue.append('say hello')
+    sayapp.cmdqueue.append('exit')
+    sayapp.loop()
     out, err = capsys.readouterr()
     assert out == 'one\nhello\n'
     assert not err
 
 
-def test_preloop_hooks(capsys):
-    app = SayApp()
-    app.register_preloop_hook(app.prepost_hook_one)
-    app.register_preloop_hook(app.prepost_hook_two)
-    app.cmdqueue.append('say hello')
-    app.cmdqueue.append('exit')
-    app.loop()
+def test_preloop_hooks(sayapp, capsys):
+    sayapp.register_preloop_hook(sayapp.prepost_hook_one)
+    sayapp.register_preloop_hook(sayapp.prepost_hook_two)
+    sayapp.cmdqueue.append('say hello')
+    sayapp.cmdqueue.append('exit')
+    sayapp.loop()
     out, err = capsys.readouterr()
     assert out == 'one\ntwo\nhello\n'
     assert not err
 
 
-def test_register_preloop_hook_too_many_parameters():
-    app = SayApp()
+def test_register_preloop_hook_too_many_parameters(sayapp):
     with pytest.raises(TypeError):
-        app.register_preloop_hook(app.prepost_hook_too_many_parameters)
+        sayapp.register_preloop_hook(sayapp.prepost_hook_too_many_parameters)
 
 
-def test_register_preloop_hook_wrong_return_annotation():
-    app = SayApp()
+def test_register_preloop_hook_wrong_return_annotation(sayapp):
     with pytest.raises(TypeError):
-        app.register_preloop_hook(app.prepost_hook_wrong_return_annotation)
+        sayapp.register_preloop_hook(sayapp.prepost_hook_wrong_return_annotation)
 
 
 ###
@@ -183,39 +187,35 @@ def test_register_preloop_hook_wrong_return_annotation():
 # test postloop hooks
 #
 ###
-def test_postloop_hook(capsys):
-    app = SayApp()
-    app.register_postloop_hook(app.prepost_hook_one)
-    app.cmdqueue.append('say hello')
-    app.cmdqueue.append('exit')
-    app.loop()
+def test_postloop_hook(sayapp, capsys):
+    sayapp.register_postloop_hook(sayapp.prepost_hook_one)
+    sayapp.cmdqueue.append('say hello')
+    sayapp.cmdqueue.append('exit')
+    sayapp.loop()
     out, err = capsys.readouterr()
     assert out == 'hello\none\n'
     assert not err
 
 
-def test_postloop_hooks(capsys):
-    app = SayApp()
-    app.register_postloop_hook(app.prepost_hook_one)
-    app.register_postloop_hook(app.prepost_hook_two)
-    app.cmdqueue.append('say hello')
-    app.cmdqueue.append('exit')
-    app.loop()
+def test_postloop_hooks(sayapp, capsys):
+    sayapp.register_postloop_hook(sayapp.prepost_hook_one)
+    sayapp.register_postloop_hook(sayapp.prepost_hook_two)
+    sayapp.cmdqueue.append('say hello')
+    sayapp.cmdqueue.append('exit')
+    sayapp.loop()
     out, err = capsys.readouterr()
     assert out == 'hello\none\ntwo\n'
     assert not err
 
 
-def test_register_postloop_hook_too_many_parameters():
-    app = SayApp()
+def test_register_postloop_hook_too_many_parameters(sayapp):
     with pytest.raises(TypeError):
-        app.register_postloop_hook(app.prepost_hook_too_many_parameters)
+        sayapp.register_postloop_hook(sayapp.prepost_hook_too_many_parameters)
 
 
-def test_register_postloop_hook_wrong_return_annotation():
-    app = SayApp()
+def test_register_postloop_hook_wrong_return_annotation(sayapp):
     with pytest.raises(TypeError):
-        app.register_postloop_hook(app.prepost_hook_wrong_return_annotation)
+        sayapp.register_postloop_hook(sayapp.prepost_hook_wrong_return_annotation)
 
 
 ###
@@ -223,67 +223,59 @@ def test_register_postloop_hook_wrong_return_annotation():
 # test post-execute hooks
 #
 ###
-def test_postexecute_hook(capsys):
-    app = SayApp()
-    app.register_postexecute_hook(app.postexecute_hook)
-    app.do('say hello')
+def test_postexecute_hook(sayapp, capsys):
+    sayapp.register_postexecute_hook(sayapp.postexecute_hook)
+    sayapp.do('say hello')
     out, err = capsys.readouterr()
     assert out == 'hello\n'
     assert not err
-    assert app.called_postexecute == 1
+    assert sayapp.called_postexecute == 1
 
 
-def test_postexecute_hooks(capsys):
-    app = SayApp()
-    app.register_postexecute_hook(app.postexecute_hook)
-    app.register_postexecute_hook(app.postexecute_hook)
-    app.do('say hello')
+def test_postexecute_hooks(sayapp, capsys):
+    sayapp.register_postexecute_hook(sayapp.postexecute_hook)
+    sayapp.register_postexecute_hook(sayapp.postexecute_hook)
+    sayapp.do('say hello')
     out, err = capsys.readouterr()
     assert out == 'hello\n'
     assert not err
-    assert app.called_postexecute == 2
+    assert sayapp.called_postexecute == 2
 
 
-def test_register_postexecute_hook_not_enough_parameters():
-    app = SayApp()
+def test_register_postexecute_hook_not_enough_parameters(sayapp):
     with pytest.raises(TypeError):
-        app.register_postexecute_hook(app.postexecute_hook_not_enough_parameters)
+        sayapp.register_postexecute_hook(sayapp.postexecute_hook_not_enough_parameters)
 
 
-def test_register_postexecute_hook_too_many_parameters():
-    app = SayApp()
+def test_register_postexecute_hook_too_many_parameters(sayapp):
+    sayapp = SayApp()
     with pytest.raises(TypeError):
-        app.register_postexecute_hook(app.postexecute_hook_too_many_parameters)
+        sayapp.register_postexecute_hook(sayapp.postexecute_hook_too_many_parameters)
 
 
-def test_register_postexecute_hook_no_parameter_annotation():
-    app = SayApp()
+def test_register_postexecute_hook_no_parameter_annotation(sayapp):
     with pytest.raises(TypeError):
-        app.register_postexecute_hook(app.postexecute_hook_no_parameter_annotation)
+        sayapp.register_postexecute_hook(sayapp.postexecute_hook_no_parameter_annotation)
 
 
-def test_register_postexecute_hook_partial_parameter_annotation():
-    app = SayApp()
+def test_register_postexecute_hook_partial_parameter_annotation(sayapp):
     with pytest.raises(TypeError):
-        app.register_postexecute_hook(app.postexecute_hook_partial_parameter_annotation)
+        sayapp.register_postexecute_hook(sayapp.postexecute_hook_partial_parameter_annotation)
 
 
-def test_register_postexecute_hook_wrong_parameter_annotation():
-    app = SayApp()
+def test_register_postexecute_hook_wrong_parameter_annotation(sayapp):
     with pytest.raises(TypeError):
-        app.register_postexecute_hook(app.postexecute_hook_wrong_parameter_annotation)
+        sayapp.register_postexecute_hook(sayapp.postexecute_hook_wrong_parameter_annotation)
 
 
-def test_register_postexecute_hook_no_return_annotation():
-    app = SayApp()
+def test_register_postexecute_hook_no_return_annotation(sayapp):
     with pytest.raises(TypeError):
-        app.register_postexecute_hook(app.postexecute_hook_no_return_annotation)
+        sayapp.register_postexecute_hook(sayapp.postexecute_hook_no_return_annotation)
 
 
-def test_register_postexecute_hook_wrong_return_annotation():
-    app = SayApp()
+def test_register_postexecute_hook_wrong_return_annotation(sayapp):
     with pytest.raises(TypeError):
-        app.register_postexecute_hook(app.postexecute_hook_wrong_return_annotation)
+        sayapp.register_postexecute_hook(sayapp.postexecute_hook_wrong_return_annotation)
 
 
     # ###

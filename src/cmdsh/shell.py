@@ -231,10 +231,3 @@ class Shell:
         subclasses or personalities can over-ride it to create a dynamic prompt.
         """
         return self.prompt
-
-    #
-    # built in commands
-    #
-    def do_exit(self, statement: Statement) -> Result:
-        """Exit the shell"""
-        return Result(exit_code=0, stop=True)

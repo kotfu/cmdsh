@@ -25,6 +25,9 @@ import pytest
 
 import cmdsh
 
+#
+# DefaultResult module
+#
 class DefaultResultApp(cmdsh.Shell):
     """A simple app to rest the DefaultResult module"""
 
@@ -34,10 +37,12 @@ class DefaultResultApp(cmdsh.Shell):
         # don't return anything here
         # we want to see if the module will do it for us
 
+
 def test_no_result():
     drapp = DefaultResultApp()
     result = drapp.do('say hello')
     assert result is None
+
 
 def test_default_result():
     drapp = DefaultResultApp()
@@ -46,4 +51,19 @@ def test_default_result():
     result = drapp.do('say hello')
     assert result
     assert result.exit_code == 0
-    assert result.stop == False
+    assert not result.stop
+
+
+#
+# ExitCommand module
+#
+def test_exit_command():
+    app = cmdsh.Shell()
+    with pytest.raises(cmdsh.CommandNotFound):
+        result = app.do('exit')
+
+    exit_command = cmdsh.modules.ExitCommand()
+    app.load_module(exit_command)
+    result = app.do('exit')
+    assert result.exit_code == 0
+    assert result.stop
