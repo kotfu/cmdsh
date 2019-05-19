@@ -6,7 +6,7 @@ command loop by::
 
     import cmdsh
     shell = cmdsh.Shell()
-    last_result = shell.cmdloop()
+    last_result = shell.loop()
 
 The shell then repeatedly reads a statement, parses the input, executes a command, and
 displays any output. This continues until some command requests the loop terminate.
