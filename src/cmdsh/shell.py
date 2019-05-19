@@ -108,17 +108,17 @@ class Shell:
 
     def execute(self, line: str) -> Result:
         """Parse input and run the command, including all applicable hooks"""
+        # run pre-parse hooks
         statement = self._personality.parser.parse(line)
+        # run pre-execute hooks
         func = self._command_func(statement.command)
         if func:
-            # run pre-execute hooks
             result = func(statement)
             # run post-execute hooks
             if not result:
                 # they didn't return a result, so let's create the default one
                 result = Result()
             return result
-
         raise CommandNotFound(statement)
 
     def _command_func(self, command: str) -> Optional[Callable]:
@@ -185,7 +185,7 @@ class Shell:
         """Generate the prompt which is displayed before user input.
 
         Rather than access the prompt attribute directly, we call this method so that
-        subclasses can over-ride it to create a dynamic prompt.
+        subclasses or personalities can over-ride it to create a dynamic prompt.
         """
         return self.prompt
 
