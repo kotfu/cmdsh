@@ -56,6 +56,7 @@ class Shell:
         # initialize private variables
         self._preloop_hooks = []
         self._postloop_hooks = []
+        self._postexecute_hooks = []
 
         # public attributes get sensible defaults
         self.cmdqueue = []
@@ -65,7 +66,7 @@ class Shell:
         self._personality = personality
         self._personality.bind(self)
 
-    def cmdloop(self) -> Result:
+    def loop(self) -> Result:
         """Get user input, parse it, and run the commands
 
         Returns the result of the last command
@@ -94,7 +95,7 @@ class Shell:
 
             # Run the command along with all associated pre and post hooks
             try:
-                result = self.execute(line)
+                result = self.do(line)
                 if result.stop:
                     break
             except CommandNotFound as err:
@@ -106,15 +107,18 @@ class Shell:
 
         return result
 
-    def execute(self, line: str) -> Result:
-        """Parse input and run the command, including all applicable hooks"""
+    def do(self, line: str) -> Result:
+        """Parse input and execute the statement, including all applicable hooks"""
         # run pre-parse hooks
         statement = self._personality.parser.parse(line)
         # run pre-execute hooks
         func = self._command_func(statement.command)
         if func:
             result = func(statement)
-            # run post-execute hooks
+
+            for func in self._postexecute_hooks:
+                func(statement, result)
+
             if not result:
                 # they didn't return a result, so let's create the default one
                 result = Result()
@@ -169,6 +173,37 @@ class Shell:
         """Register a function to be called after the command loop finishes."""
         self._validate_prepostloop_callable(func)
         self._postloop_hooks.append(func)
+
+    @classmethod
+    def _validate_callable_argument(cls, func, argnum, typ):
+        signature = inspect.signature(func)
+        paramname = list(signature.parameters.keys())[argnum-1]
+        param = signature.parameters[paramname]
+        if param.annotation != typ:
+            raise TypeError('argument {} of {} has incompatible type {}, expected {}'.format(
+                argnum,
+                func.__name__,
+                param.annotation,
+                typ.__name__,
+            ))
+
+    @classmethod
+    def _validate_postexecute_callable(cls, func: Callable[[None], Result]) -> None:
+        """Check parameter and return types for post-execute hooks"""
+        cls._validate_callable_param_count(func, 2)
+        cls._validate_callable_argument(func, 1, Statement)
+        cls._validate_callable_argument(func, 2, Result)
+
+        signature = inspect.signature(func)
+        if signature.return_annotation != Result:
+            raise TypeError("{} must declare return a return type of 'cmdsh.Result'".format(
+                func.__name__
+            ))
+
+    def register_postexecute_hook(self, func: Callable[[None], None]) -> None:
+        """Register a function to be called after command execution completes."""
+        self._validate_postexecute_callable(func)
+        self._postexecute_hooks.append(func)
 
     #
     # output handling

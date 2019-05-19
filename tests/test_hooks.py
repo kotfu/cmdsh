@@ -27,22 +27,24 @@ import pytest
 import cmdsh
 
 
-class Plugin:
-    """A mixin class for testing hook registration and calling"""
+class SayApp(cmdsh.Shell):
+    """A simple app with lots of hooks"""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.reset_counters()
 
     def reset_counters(self):
-        self.called_preparse = 0
-        self.called_postparsing = 0
-        self.called_precmd = 0
-        self.called_postcmd = 0
-        self.called_cmdfinalization = 0
+        """Set hook call counters to zero"""
+        self.called_postexecute = 0
+
+    def do_say(self, statement: cmdsh.Statement) -> cmdsh.Result:
+        """Repeat back the arguments"""
+        self.wout(' '.join(statement.arglist))
+        return cmdsh.Result()
 
     ###
     #
-    # preloop and postloop hooks
+    # preloop and postloop hooks, some valid, some invalid
     # which share the same signature and are thus interchangable
     #
     ###
@@ -57,8 +59,232 @@ class Plugin:
     def prepost_hook_too_many_parameters(self, param) -> None:
         """A preloop or postloop hook with too many parameters"""
 
-    def prepost_hook_with_wrong_return_annotation(self) -> bool:
+    def prepost_hook_wrong_return_annotation(self) -> bool:
         """A preloop or postloop hook with incorrect return type"""
+
+    ###
+    #
+    # post-execute hooks, some valid, some invalid
+    #
+    ###
+    def postexecute_hook(self, statement: cmdsh.Statement, result: cmdsh.Result) -> cmdsh.Result:
+        """A post-execute hook"""
+        # pylint: disable=unused-argument
+        self.called_postexecute += 1
+        return result
+
+    def postexecute_hook_exception(
+            self,
+            statement: cmdsh.Statement,
+            result: cmdsh.Result,
+    ) -> cmdsh.Result:
+        """A post-execute hook which raises an exception"""
+        # pylint: disable=unused-argument
+        self.called_postexecute += 1
+        raise ZeroDivisionError
+
+    def postexecute_hook_not_enough_parameters(self) -> cmdsh.Result:
+        """A post-execute hook with no parameters"""
+
+    def postexecute_hook_too_many_parameters(
+            self,
+            statement: cmdsh.Statement,
+            result: cmdsh.Result(),
+            three: str,
+    ) -> cmdsh.Result:
+        """A post-execute hook with too many parameters"""
+        # pylint: disable=unused-argument
+        return result
+
+    def postexecute_hook_no_parameter_annotation(self, statement, result) -> cmdsh.Result:
+        """A post-execute hook with no type annotation on the parameter"""
+        # pylint: disable=unused-argument
+        return result
+
+    def postexecute_hook_partial_parameter_annotation(
+            self,
+            statement: cmdsh.Statement,
+            result,
+    ) -> cmdsh.Result:
+        """A post-execute hook with partial parameter annotation"""
+        # pylint: disable=unused-argument
+        return result
+
+    def postexecute_hook_wrong_parameter_annotation(
+            self,
+            statement: str,
+            result: str
+    ) -> cmdsh.Result:
+        """A post-execute hook with the incorrect type annotation on the parameter"""
+        # pylint: disable=unused-argument
+        return result
+
+    def postexecute_hook_no_return_annotation(
+            self,
+            statement: cmdsh.Statement,
+            result: cmdsh.Result,
+    ):
+        """A post-execute hook with no type annotation on the return value"""
+        # pylint: disable=unused-argument
+        return result
+
+    def postexecute_hook_wrong_return_annotation(
+            self,
+            statement: cmdsh.Statement,
+            result: cmdsh.Result,
+    ) -> cmdsh.Statement:
+        """A post-execute hook with the wrong return annotation"""
+        # pylint: disable=unused-argument
+        return statement
+
+
+###
+#
+# test preloop hooks
+#
+###
+def test_preloop_hook(capsys):
+    app = SayApp()
+    app.register_preloop_hook(app.prepost_hook_one)
+    app.cmdqueue.append('say hello')
+    app.cmdqueue.append('exit')
+    app.cmdloop()
+    out, err = capsys.readouterr()
+    assert out == 'one\nhello\n'
+    assert not err
+
+
+def test_preloop_hooks(capsys):
+    app = SayApp()
+    app.register_preloop_hook(app.prepost_hook_one)
+    app.register_preloop_hook(app.prepost_hook_two)
+    app.cmdqueue.append('say hello')
+    app.cmdqueue.append('exit')
+    app.cmdloop()
+    out, err = capsys.readouterr()
+    assert out == 'one\ntwo\nhello\n'
+    assert not err
+
+
+def test_register_preloop_hook_too_many_parameters():
+    app = SayApp()
+    with pytest.raises(TypeError):
+        app.register_preloop_hook(app.prepost_hook_too_many_parameters)
+
+
+def test_register_preloop_hook_wrong_return_annotation():
+    app = SayApp()
+    with pytest.raises(TypeError):
+        app.register_preloop_hook(app.prepost_hook_wrong_return_annotation)
+
+
+###
+#
+# test postloop hooks
+#
+###
+def test_postloop_hook(capsys):
+    app = SayApp()
+    app.register_postloop_hook(app.prepost_hook_one)
+    app.cmdqueue.append('say hello')
+    app.cmdqueue.append('exit')
+    app.cmdloop()
+    out, err = capsys.readouterr()
+    assert out == 'hello\none\n'
+    assert not err
+
+
+def test_postloop_hooks(capsys):
+    app = SayApp()
+    app.register_postloop_hook(app.prepost_hook_one)
+    app.register_postloop_hook(app.prepost_hook_two)
+    app.cmdqueue.append('say hello')
+    app.cmdqueue.append('exit')
+    app.cmdloop()
+    out, err = capsys.readouterr()
+    assert out == 'hello\none\ntwo\n'
+    assert not err
+
+
+def test_register_postloop_hook_too_many_parameters():
+    app = SayApp()
+    with pytest.raises(TypeError):
+        app.register_postloop_hook(app.prepost_hook_too_many_parameters)
+
+
+def test_register_postloop_hook_wrong_return_annotation():
+    app = SayApp()
+    with pytest.raises(TypeError):
+        app.register_postloop_hook(app.prepost_hook_wrong_return_annotation)
+
+
+###
+#
+# test post-execute hooks
+#
+###
+def test_postexecute_hook(capsys):
+    app = SayApp()
+    app.register_postexecute_hook(app.postexecute_hook)
+    app.do('say hello')
+    out, err = capsys.readouterr()
+    assert out == 'hello\n'
+    assert not err
+    assert app.called_postexecute == 1
+
+
+def test_postexecute_hooks(capsys):
+    app = SayApp()
+    app.register_postexecute_hook(app.postexecute_hook)
+    app.register_postexecute_hook(app.postexecute_hook)
+    app.do('say hello')
+    out, err = capsys.readouterr()
+    assert out == 'hello\n'
+    assert not err
+    assert app.called_postexecute == 2
+
+
+def test_register_postexecute_hook_not_enough_parameters():
+    app = SayApp()
+    with pytest.raises(TypeError):
+        app.register_postexecute_hook(app.postexecute_hook_not_enough_parameters)
+
+
+def test_register_postexecute_hook_too_many_parameters():
+    app = SayApp()
+    with pytest.raises(TypeError):
+        app.register_postexecute_hook(app.postexecute_hook_too_many_parameters)
+
+
+def test_register_postexecute_hook_no_parameter_annotation():
+    app = SayApp()
+    with pytest.raises(TypeError):
+        app.register_postexecute_hook(app.postexecute_hook_no_parameter_annotation)
+
+
+def test_register_postexecute_hook_partial_parameter_annotation():
+    app = SayApp()
+    with pytest.raises(TypeError):
+        app.register_postexecute_hook(app.postexecute_hook_partial_parameter_annotation)
+
+
+def test_register_postexecute_hook_wrong_parameter_annotation():
+    app = SayApp()
+    with pytest.raises(TypeError):
+        app.register_postexecute_hook(app.postexecute_hook_wrong_parameter_annotation)
+
+
+def test_register_postexecute_hook_no_return_annotation():
+    app = SayApp()
+    with pytest.raises(TypeError):
+        app.register_postexecute_hook(app.postexecute_hook_no_return_annotation)
+
+
+def test_register_postexecute_hook_wrong_return_annotation():
+    app = SayApp()
+    with pytest.raises(TypeError):
+        app.register_postexecute_hook(app.postexecute_hook_wrong_return_annotation)
+
 
     # ###
     # #
@@ -164,48 +390,8 @@ class Plugin:
     # def precmd_hook_wrong_return_annotation(self, data: plugin.PrecommandData) -> cmd2.Statement:
     #     return self.statement_parser.parse('hi there')
 
-    # ###
-    # #
-    # # postcommand hooks, some valid, some invalid
-    # #
-    # ###
-    # def postcmd(self, stop: bool, statement: cmd2.Statement) -> bool:
-    #     """Override cmd.Cmd method"""
-    #     self.called_postcmd += 1
-    #     return stop
 
-    # def postcmd_hook(self, data: plugin.PostcommandData) -> plugin.PostcommandData:
-    #     """A postcommand hook"""
-    #     self.called_postcmd += 1
-    #     return data
 
-    # def postcmd_hook_exception(self, data: plugin.PostcommandData) -> plugin.PostcommandData:
-    #     """A postcommand hook with raises an exception"""
-    #     self.called_postcmd += 1
-    #     raise ZeroDivisionError
-
-    # def postcmd_hook_not_enough_parameters(self) -> plugin.PostcommandData:
-    #     """A precommand hook with no parameters"""
-    #     pass
-
-    # def postcmd_hook_too_many_parameters(self, one: plugin.PostcommandData, two: str) -> plugin.PostcommandData:
-    #     """A precommand hook with too many parameters"""
-    #     return one
-
-    # def postcmd_hook_no_parameter_annotation(self, data) -> plugin.PostcommandData:
-    #     """A precommand hook with no type annotation on the parameter"""
-    #     return data
-
-    # def postcmd_hook_wrong_parameter_annotation(self, data: str) -> plugin.PostcommandData:
-    #     """A precommand hook with the incorrect type annotation on the parameter"""
-    #     return data
-
-    # def postcmd_hook_no_return_annotation(self, data: plugin.PostcommandData):
-    #     """A precommand hook with no type annotation on the return value"""
-    #     return data
-
-    # def postcmd_hook_wrong_return_annotation(self, data: plugin.PostcommandData) -> cmd2.Statement:
-    #     return self.statement_parser.parse('hi there')
 
     # ###
     # #
@@ -253,84 +439,9 @@ class Plugin:
     #     return self.statement_parser.parse('hi there')
 
 
-class PluggedApp(Plugin, cmdsh.Shell):
-    """A sample app with a plugin mixed in"""
-    def do_say(self, statement):
-        """Repeat back the arguments"""
-        self.wout(' '.join(statement.arglist))
-        return cmdsh.Result()
-
-
-###
-#
-# test pre and postloop hooks
-#
-###
-def test_register_preloop_hook_too_many_parameters():
-    app = PluggedApp()
-    with pytest.raises(TypeError):
-        app.register_preloop_hook(app.prepost_hook_too_many_parameters)
-
-
-def test_register_preloop_hook_with_return_annotation():
-    app = PluggedApp()
-    with pytest.raises(TypeError):
-        app.register_preloop_hook(app.prepost_hook_with_wrong_return_annotation)
-
-
-def test_preloop_hook(capsys):
-    app = PluggedApp()
-    app.register_preloop_hook(app.prepost_hook_one)
-    app.cmdqueue.append('say hello')
-    app.cmdqueue.append('exit')
-    app.cmdloop()
-    out, err = capsys.readouterr()
-    assert out == 'one\nhello\n'
-    assert not err
-
-
-def test_preloop_hooks(capsys):
-    app = PluggedApp()
-    app.register_preloop_hook(app.prepost_hook_one)
-    app.register_preloop_hook(app.prepost_hook_two)
-    app.cmdqueue.append('say hello')
-    app.cmdqueue.append('exit')
-    app.cmdloop()
-    out, err = capsys.readouterr()
-    assert out == 'one\ntwo\nhello\n'
-    assert not err
-
-
-def test_register_postloop_hook_too_many_parameters():
-    app = PluggedApp()
-    with pytest.raises(TypeError):
-        app.register_postloop_hook(app.prepost_hook_too_many_parameters)
-
-
-def test_register_postloop_hook_with_wrong_return_annotation():
-    app = PluggedApp()
-    with pytest.raises(TypeError):
-        app.register_postloop_hook(app.prepost_hook_with_wrong_return_annotation)
-
-
-def test_postloop_hook(capsys):
-    app = PluggedApp()
-    app.register_postloop_hook(app.prepost_hook_one)
-    app.cmdqueue.append('say hello')
-    app.cmdqueue.append('exit')
-    app.cmdloop()
-    out, err = capsys.readouterr()
-    assert out == 'hello\none\n'
-    assert not err
-
-
-def test_postloop_hooks(capsys):
-    app = PluggedApp()
-    app.register_postloop_hook(app.prepost_hook_one)
-    app.register_postloop_hook(app.prepost_hook_two)
-    app.cmdqueue.append('say hello')
-    app.cmdqueue.append('exit')
-    app.cmdloop()
-    out, err = capsys.readouterr()
-    assert out == 'hello\none\ntwo\n'
-    assert not err
+# class PluggedApp(Plugin, cmdsh.Shell):
+#     """A sample app with a plugin mixed in"""
+#     def do_say(self, statement):
+#         """Repeat back the arguments"""
+#         self.wout(' '.join(statement.arglist))
+#         return cmdsh.Result()

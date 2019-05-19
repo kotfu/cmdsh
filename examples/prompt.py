@@ -31,7 +31,7 @@ class App(cmdsh.Shell):
 def main():
     """instantiate and launch the application"""
     app = App()
-    last_result = app.cmdloop()
+    last_result = app.loop()
     return last_result.exit_code
 
 
