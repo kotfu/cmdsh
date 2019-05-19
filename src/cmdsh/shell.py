@@ -158,6 +158,19 @@ class Shell:
             ))
 
     @classmethod
+    def _validate_callable_argument(cls, func, argnum, typ):
+        signature = inspect.signature(func)
+        paramname = list(signature.parameters.keys())[argnum-1]
+        param = signature.parameters[paramname]
+        if param.annotation != typ:
+            raise TypeError('argument {} of {} has incompatible type {}, expected {}'.format(
+                argnum,
+                func.__name__,
+                param.annotation,
+                typ.__name__,
+            ))
+
+    @classmethod
     def _validate_prepostloop_callable(cls, func: Callable[[None], None]) -> None:
         """Check parameter and return types for preloop and postloop hooks."""
         cls._validate_callable_param_count(func, 0)
@@ -177,19 +190,6 @@ class Shell:
         """Register a function to be called after the command loop finishes."""
         self._validate_prepostloop_callable(func)
         self._postloop_hooks.append(func)
-
-    @classmethod
-    def _validate_callable_argument(cls, func, argnum, typ):
-        signature = inspect.signature(func)
-        paramname = list(signature.parameters.keys())[argnum-1]
-        param = signature.parameters[paramname]
-        if param.annotation != typ:
-            raise TypeError('argument {} of {} has incompatible type {}, expected {}'.format(
-                argnum,
-                func.__name__,
-                param.annotation,
-                typ.__name__,
-            ))
 
     @classmethod
     def _validate_postexecute_callable(cls, func: Callable[[None], Result]) -> None:
