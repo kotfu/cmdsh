@@ -114,6 +114,8 @@ class Shell:
 
     def do(self, line: str) -> Result:
         """Parse input and execute the statement, including all applicable hooks"""
+        # pylint: disable=invalid-name
+
         # run pre-parse hooks
         statement = self._personality.parser.parse(line)
         # run pre-execute hooks
@@ -233,10 +235,12 @@ class Shell:
     #
     def wout(self, data: str) -> None:
         """write data to stdout"""
+        # pylint: disable=no-self-use
         sys.stdout.write('{}\n'.format(data))
 
     def werr(self, data: str) -> None:
         """write data to stderr"""
+        # pylint: disable=no-self-use
         sys.stderr.write('{}\n'.format(data))
 
     def render_prompt(self) -> str:

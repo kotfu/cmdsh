@@ -28,6 +28,7 @@ You can use any class as a parser, as long is it implements the following method
 parse(self, line: str) -> Statement
 
 """
+# pylint: disable=no-self-use
 
 import shlex
 
@@ -39,7 +40,7 @@ class SimpleParser:
 
     Quoted arguments are properly handled
     """
-
+    # pylint: disable=too-few-public-methods
     def parse(self, line: str) -> Statement:
         """Split the input on whitespace"""
         argv = list(shlex.shlex(line, posix=False))
@@ -58,7 +59,7 @@ class PosixShellParser:
     - Escape sequences are interpreted
     - Everything after an unquoted/unescaped # is treated as a comment
     """
-
+    # pylint: disable=too-few-public-methods
     def parse(self, line: str) -> Statement:
         """Posix split the input"""
         argv = list(shlex.shlex(line, posix=True, punctuation_chars=True))

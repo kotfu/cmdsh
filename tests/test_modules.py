@@ -25,6 +25,7 @@ import pytest
 
 import cmdsh
 
+
 #
 # DefaultResult module
 #

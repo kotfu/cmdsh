@@ -44,6 +44,7 @@ from .parsers import SimpleParser
 
 class StandardLibraryPersonality:
     """Closely (but not perfectly) emulates the behavior of the standard library"""
+    # pylint: disable=too-few-public-methods
     def __init__(self):
         self.parser = SimpleParser()
 

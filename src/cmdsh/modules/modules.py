@@ -24,10 +24,11 @@
 """Modules are dynamically loaded into an instantiated shell to add
 additional functionality.
 """
+# pylint: disable=no-self-use
 
 import types
 
-import cmdsh
+from ..models import Statement, Result
 
 
 class DefaultResult:
@@ -39,22 +40,22 @@ class DefaultResult:
 
         # this is the incantation that binds a method from an instance of
         # the module to an instance of the shell
-        shell._default_result_hook = types.MethodType(self._default_result_hook.__func__, shell)
+        shell.default_result_hook = types.MethodType(self.default_result_hook.__func__, shell)
         # register the hook we just added to the shell
-        shell.register_postexecute_hook(shell._default_result_hook)
+        shell.register_postexecute_hook(shell.default_result_hook)
 
     #
     # bound methods
     #
     # these methods end up bound to the shell, not to the module
-    def _default_result_hook(
+    def default_result_hook(
             self,
-            statement: cmdsh.Statement,
-            result: cmdsh.Result,
-    ) -> cmdsh.Result:
+            _statement: Statement,
+            result: Result,
+    ) -> Result:
         """Generate a default result if one was not generated"""
         if not result:
-            result = cmdsh.Result(exit_code=0, stop=False)
+            result = Result(exit_code=0, stop=False)
         return result
 
 
@@ -72,6 +73,6 @@ class ExitCommand:
     # bound methods
     #
     # these methods end up bound to the shell, not to the module
-    def do_exit(self, statement: cmdsh.Statement) -> cmdsh.Result:
+    def do_exit(self, _statement: Statement) -> Result:
         """Exit the shell"""
-        return cmdsh.Result(exit_code=0, stop=True)
+        return Result(exit_code=0, stop=True)

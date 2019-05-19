@@ -83,6 +83,7 @@ class Result():
     The default result has an exit_code of 0 (indicating no errors or success), and stop
     is False (meaning the cmdloop() continues)
     """
+    # pylint: disable=too-few-public-methods
     exit_code = attr.ib(default=0, validator=attr.validators.instance_of(int))
     stop = attr.ib(default=False, validator=attr.validators.instance_of(bool))
 
