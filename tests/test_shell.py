@@ -66,7 +66,7 @@ def test_custom_prompt(shell):
 def test_mocked_input(shell, mocker):
     """test typed input by mocking up the input call"""
     mock_input = mocker.patch('builtins.input', return_value='exit')
-    last_result = shell.cmdloop()
+    last_result = shell.loop()
     assert last_result.stop
     assert last_result.exit_code == 0
     assert mock_input.call_count == 1
@@ -76,7 +76,7 @@ def test_mocked_input_eof(shell, mocker):
     """test EOF as typed input by mocking up the input call"""
     mock_input = mocker.patch('builtins.input')
     mock_input.side_effect = EOFError()
-    last_result = shell.cmdloop()
+    last_result = shell.loop()
     assert last_result.stop
     assert last_result.exit_code == 0
     assert mock_input.call_count == 1
@@ -85,7 +85,7 @@ def test_mocked_input_eof(shell, mocker):
 def test_empty_input_no_output(shell, capsys):
     shell.cmdqueue.append('')
     shell.cmdqueue.append('exit')
-    last_result = shell.cmdloop()
+    last_result = shell.loop()
     out, err = capsys.readouterr()
     assert not out
     assert not err
@@ -96,26 +96,26 @@ def test_empty_input_no_output(shell, capsys):
 def test_command_no_returned_result(talker):
     # the say command in the talker app doesn't return a result
     # we want to make sure that cmdsh creates a default one
-    result = talker.execute('say hello')
+    result = talker.do('say hello')
     assert result
     assert not result.stop
     assert result.exit_code == 0
 
 
-def test_command_not_found_execute(shell):
+def test_command_not_found_do(shell):
     with pytest.raises(CommandNotFound):
-        shell.execute(INVALID_COMMAND)
+        shell.do(INVALID_COMMAND)
 
 
 def test_command_not_found_errmsg(shell, capsys):
     shell.cmdqueue.append(INVALID_COMMAND)
     shell.cmdqueue.append('exit')
-    shell.cmdloop()
+    shell.loop()
     out, err = capsys.readouterr()
     assert 'command not found' in err
 
 
 def test_exit(shell):
-    result = shell.execute('exit')
+    result = shell.do('exit')
     assert result.stop
     assert result.exit_code == 0

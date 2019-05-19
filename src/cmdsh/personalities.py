@@ -57,12 +57,15 @@ class StandardLibraryPersonality:
 
         """
 
+        # WARNING: dynamically binding in this way supercedes any methods
+        # defined in the cmdsh.Shell() or any subclass thereof
+
         # to bind a bare function to the shell, use this incantation
         # shell.render_prompt = types.MethodType(render_prompt, shell)
 
         # this is the incantation that binds a method from an instance of
         # the personality to the instance of the shell
-        shell.render_prompt = types.MethodType(self.render_prompt.__func__, shell)
+        # shell.render_prompt = types.MethodType(self.render_prompt.__func__, shell)
 
         # once the methods are bound to the shell, you can register them with any hooks
 
@@ -72,7 +75,8 @@ class StandardLibraryPersonality:
     # these methods end up bound to the shell, not to the personality
     # they are mixed in dynamically by the bind() method, which the shell
     # calls on initialization
-    def render_prompt(self) -> str:
-        """attempt to dynamically bind"""
-        # pylint: disable=no-member
-        return '{}'.format(self.prompt)
+
+    # def render_prompt(self) -> str:
+    #     """attempt to dynamically bind"""
+    #     # pylint: disable=no-member
+    #     return '{}'.format(self.prompt)

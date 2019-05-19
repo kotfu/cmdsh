@@ -148,7 +148,7 @@ def test_preloop_hook(capsys):
     app.register_preloop_hook(app.prepost_hook_one)
     app.cmdqueue.append('say hello')
     app.cmdqueue.append('exit')
-    app.cmdloop()
+    app.loop()
     out, err = capsys.readouterr()
     assert out == 'one\nhello\n'
     assert not err
@@ -160,7 +160,7 @@ def test_preloop_hooks(capsys):
     app.register_preloop_hook(app.prepost_hook_two)
     app.cmdqueue.append('say hello')
     app.cmdqueue.append('exit')
-    app.cmdloop()
+    app.loop()
     out, err = capsys.readouterr()
     assert out == 'one\ntwo\nhello\n'
     assert not err
@@ -188,7 +188,7 @@ def test_postloop_hook(capsys):
     app.register_postloop_hook(app.prepost_hook_one)
     app.cmdqueue.append('say hello')
     app.cmdqueue.append('exit')
-    app.cmdloop()
+    app.loop()
     out, err = capsys.readouterr()
     assert out == 'hello\none\n'
     assert not err
@@ -200,7 +200,7 @@ def test_postloop_hooks(capsys):
     app.register_postloop_hook(app.prepost_hook_two)
     app.cmdqueue.append('say hello')
     app.cmdqueue.append('exit')
-    app.cmdloop()
+    app.loop()
     out, err = capsys.readouterr()
     assert out == 'hello\none\ntwo\n'
     assert not err

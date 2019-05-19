@@ -42,8 +42,12 @@ class Shell:
 
     Attributes:
 
-    cmdqueue a list of commands. The cmdloop pops items from this list before reading
+    cmdqueue
+        a list of commands. The cmdloop pops items from this list before reading
         stdin parser the parser class to use to parse input into a Statement object
+
+    prompt
+        a static prompt to output before accepting user input
 
     Methods and attributes on this class which don't start with an underscore are
     considered part of the public api of this class. Changes to these methods and
