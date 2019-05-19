@@ -61,6 +61,7 @@ class Shell:
         self._preloop_hooks = []
         self._postloop_hooks = []
         self._postexecute_hooks = []
+        self._loaded_modules = []
 
         # public attributes get sensible defaults
         self.cmdqueue = []
@@ -141,9 +142,23 @@ class Shell:
     #
     # modules
     #
+    def is_module_loaded(self, module) -> bool:
+        """Return true if a module has previously been loaded
+
+        Since the shell processes modules that have been instantiated, we check for
+        the name of the class of the passed module.
+        """
+        klass = module.__class__
+        return klass in self._loaded_modules
+
     def load_module(self, module) -> None:
-        """Load an instantiated module object"""
-        module.load(self)
+        """Load an instantiated module object
+
+        If the module has already been loaded, it will not be loaded again
+        """
+        if not self.is_module_loaded(module):
+            module.load(self)
+            self._loaded_modules.append(module.__class__)
 
     #
     # hooks

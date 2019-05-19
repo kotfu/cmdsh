@@ -120,7 +120,20 @@ def test_command_not_found_errmsg(shell, capsys):
     assert 'command not found' in err
 
 
-# def test_exit(shell):
-#     result = shell.do('exit')
-#     assert result.stop
-#     assert result.exit_code == 0
+#
+# test module loading behavior
+#
+def test_is_module_loaded(shell):
+    exit_command = cmdsh.modules.ExitCommand()
+    assert not shell.is_module_loaded(exit_command)
+    shell.load_module(exit_command)
+    assert shell.is_module_loaded(exit_command)
+
+
+def test_modules_only_load_once(shell):
+    exit_command = cmdsh.modules.ExitCommand()
+    assert not shell.is_module_loaded(exit_command)
+    shell.load_module(exit_command)
+    assert shell.is_module_loaded(exit_command)
+    shell.load_module(exit_command)
+    assert shell._loaded_modules == [exit_command.__class__]
