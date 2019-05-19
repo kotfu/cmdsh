@@ -22,17 +22,7 @@
 # THE SOFTWARE.
 #
 """
-cmdsh is a library for creating line oriented command shells. It is mostly
-compatible with `cmd` in the standard library.
+The modules package includes
 """
 
-from pkg_resources import get_distribution, DistributionNotFound
-
-from .shell import Shell  # noqa F401
-from .models import Statement, Result  # noqa F401
-from . import modules
-
-try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:
-    __version__ = 'unknown'
+from .modules import DefaultResult

@@ -21,18 +21,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
+"""Modules are dynamically loaded into an instantiated shell to add
+additional functionality.
 """
-cmdsh is a library for creating line oriented command shells. It is mostly
-compatible with `cmd` in the standard library.
-"""
 
-from pkg_resources import get_distribution, DistributionNotFound
 
-from .shell import Shell  # noqa F401
-from .models import Statement, Result  # noqa F401
-from . import modules
-
-try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:
-    __version__ = 'unknown'
+class DefaultResult:
+    """Create a default result if a do_command() method doesn't return one"""
+    allow_multiple_loads = False
