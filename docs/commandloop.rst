@@ -36,8 +36,18 @@ Here's the specific steps that occur each time through the command loop:
 #. Output the prompt
 #. Read input
 #. Parse input into a ``Statement`` object
+#. Call all registered post-parse hooks
 #. Call ``do_command`` method
 #. Call all registered post-execute hooks
+
+
+Postparse Hooks
+---------------
+
+After the shell has parsed the input into a ``Statement`` object, it calls each registered postparse
+hook, passing the statement. The hook method can modify the statement if desired, or return it as
+passed. Raising any exception causes the statement to not be executed, and any subsequent post parse
+hooks will not be called.
 
 
 Postloop Hooks

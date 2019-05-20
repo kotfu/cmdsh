@@ -27,11 +27,13 @@ cmdsh
 
 A python library for creating interactive language shells.
 """
-import inspect
+# pylint: disable=too-many-instance-attributes
+
 import sys
 
 from typing import Callable, Optional
 
+from . import utils
 from .models import Statement, Result, CommandNotFound
 from .personalities import StandardLibraryPersonality
 
@@ -60,6 +62,7 @@ class Shell:
         # initialize private variables
         self._preloop_hooks = []
         self._postloop_hooks = []
+        self._postparse_hooks = []
         self._postexecute_hooks = []
         self._loaded_modules = []
 
@@ -113,12 +116,16 @@ class Shell:
         return result
 
     def do(self, line: str) -> Result:
-        """Parse input and execute the statement, including all applicable hooks"""
+        """Parse input and execute the statement, including all applicable hooks.
+
+        Raises any exceptions thrown by hook methods
+        """
         # pylint: disable=invalid-name
 
-        # run pre-parse hooks
         statement = self._personality.parser.parse(line)
-        # run pre-execute hooks
+        for func in self._postparse_hooks:
+            statement = func(statement)
+
         func = self._command_func(statement.command)
         if func:
             result = func(statement)
@@ -165,69 +172,31 @@ class Shell:
     #
     # hooks
     #
-    @classmethod
-    def _validate_callable_param_count(cls, func: Callable, count: int) -> None:
-        """Ensure a function has the given number of parameters."""
-        signature = inspect.signature(func)
-        # validate that the callable has the right number of parameters
-        nparam = len(signature.parameters)
-        if nparam != count:
-            raise TypeError('{} has {} positional arguments, expected {}'.format(
-                func.__name__,
-                nparam,
-                count,
-            ))
-
-    @classmethod
-    def _validate_callable_argument(cls, func, argnum, typ):
-        signature = inspect.signature(func)
-        paramname = list(signature.parameters.keys())[argnum-1]
-        param = signature.parameters[paramname]
-        if param.annotation != typ:
-            raise TypeError('argument {} of {} has incompatible type {}, expected {}'.format(
-                argnum,
-                func.__name__,
-                param.annotation,
-                typ.__name__,
-            ))
-
-    @classmethod
-    def _validate_prepostloop_callable(cls, func: Callable[[None], None]) -> None:
-        """Check parameter and return types for preloop and postloop hooks."""
-        cls._validate_callable_param_count(func, 0)
-        # make sure there is no return notation
-        signature = inspect.signature(func)
-        if signature.return_annotation is not None:
-            raise TypeError("{} must declare return a return type of 'None'".format(
-                func.__name__,
-            ))
-
     def register_preloop_hook(self, func: Callable[[None], None]) -> None:
         """Register a function to be called before the command loop starts."""
-        self._validate_prepostloop_callable(func)
+        utils.validate_callable_param_count(func, 0)
+        utils.validate_callable_return(func, None)
         self._preloop_hooks.append(func)
 
     def register_postloop_hook(self, func: Callable[[None], None]) -> None:
         """Register a function to be called after the command loop finishes."""
-        self._validate_prepostloop_callable(func)
+        utils.validate_callable_param_count(func, 0)
+        utils.validate_callable_return(func, None)
         self._postloop_hooks.append(func)
 
-    @classmethod
-    def _validate_postexecute_callable(cls, func: Callable[[None], Result]) -> None:
-        """Check parameter and return types for post-execute hooks"""
-        cls._validate_callable_param_count(func, 2)
-        cls._validate_callable_argument(func, 1, Statement)
-        cls._validate_callable_argument(func, 2, Result)
-
-        signature = inspect.signature(func)
-        if signature.return_annotation != Result:
-            raise TypeError("{} must declare return a return type of 'cmdsh.Result'".format(
-                func.__name__
-            ))
+    def register_postparse_hook(self, func: Callable[[Statement], Statement]) -> None:
+        """Register a method to be called after parsing input but before the command execution."""
+        utils.validate_callable_param_count(func, 1)
+        utils.validate_callable_argument(func, 1, Statement)
+        utils.validate_callable_return(func, Statement)
+        self._postparse_hooks.append(func)
 
     def register_postexecute_hook(self, func: Callable[[Statement, Result], Result]) -> None:
         """Register a function to be called after command execution completes."""
-        self._validate_postexecute_callable(func)
+        utils.validate_callable_param_count(func, 2)
+        utils.validate_callable_argument(func, 1, Statement)
+        utils.validate_callable_argument(func, 2, Result)
+        utils.validate_callable_return(func, Result)
         self._postexecute_hooks.append(func)
 
     #
