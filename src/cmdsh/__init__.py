@@ -30,7 +30,7 @@ from pkg_resources import get_distribution, DistributionNotFound
 
 from .shell import Shell  # noqa F401
 from .models import Statement, Result, CommandNotFound  # noqa F401
-from . import modules
+from . import modules  # noqa F401
 
 try:
     __version__ = get_distribution(__name__).version

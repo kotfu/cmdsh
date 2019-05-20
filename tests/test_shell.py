@@ -130,6 +130,7 @@ def test_module_load_class(shell):
     shell.load_module(cmdsh.modules.ExitCommand)
     assert shell.is_module_loaded(cmdsh.modules.ExitCommand)
 
+
 def test_modules_only_load_once(shell):
     assert not shell.is_module_loaded(cmdsh.modules.ExitCommand)
     shell.load_module(cmdsh.modules.ExitCommand)
