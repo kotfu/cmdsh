@@ -29,13 +29,14 @@ A python library for creating interactive language shells.
 """
 # pylint: disable=too-many-instance-attributes
 
+import inspect
 import sys
 
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 from . import utils
 from .models import Statement, Result, CommandNotFound
-from .personalities import StandardLibraryPersonality
+from .personalities import SimplePersonality
 
 
 class Shell:
@@ -58,7 +59,7 @@ class Shell:
 
     """
 
-    def __init__(self, personality=StandardLibraryPersonality()):
+    def __init__(self, personality=SimplePersonality()):
         # initialize private variables
         self._preloop_hooks = []
         self._postloop_hooks = []
@@ -118,7 +119,7 @@ class Shell:
     def do(self, line: str) -> Result:
         """Parse input and execute the statement, including all applicable hooks.
 
-        Raises any exceptions thrown by hook methods
+        Raises any exceptions thrown by hook methods or by the command function
         """
         # pylint: disable=invalid-name
 
@@ -151,20 +152,25 @@ class Shell:
     #
     # modules
     #
-    def is_module_loaded(self, module) -> bool:
+    def is_module_loaded(self, module: Any) -> bool:
         """Return true if a module has previously been loaded
 
         Since the shell processes modules that have been instantiated, we check for
         the name of the class of the passed module.
         """
-        klass = module.__class__
+        if inspect.isclass(module):
+            klass = module
+        else:
+            klass = module.__class__
         return klass in self._loaded_modules
 
-    def load_module(self, module) -> None:
+    def load_module(self, module: Any) -> None:
         """Load an instantiated module object
 
         If the module has already been loaded, it will not be loaded again
         """
+        if inspect.isclass(module):
+            module = module()
         if not self.is_module_loaded(module):
             module.load(self)
             self._loaded_modules.append(module.__class__)

@@ -32,7 +32,7 @@ parser - a parser as defined in parsers.py
 import types
 
 from .parsers import SimpleParser
-
+from .modules import ExitCommand
 
 #
 # bound methods
@@ -57,6 +57,7 @@ class StandardLibraryPersonality:
 
 
         """
+        shell.load_module(ExitCommand)
 
         # WARNING: dynamically binding in this way supercedes any methods
         # defined in the cmdsh.Shell() or any subclass thereof
@@ -81,3 +82,12 @@ class StandardLibraryPersonality:
     #     """attempt to dynamically bind"""
     #     # pylint: disable=no-member
     #     return '{}'.format(self.prompt)
+
+class SimplePersonality:
+    """The simplest personality there is"""
+    # pylint: disable=too-few-public-methods
+    def __init__(self):
+        self.parser = SimpleParser()
+
+    def bind(self, shell):
+        """Method must be present for personality to bind, but this one is a noop"""

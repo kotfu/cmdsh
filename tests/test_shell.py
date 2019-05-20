@@ -33,8 +33,7 @@ INVALID_COMMAND = 'thisisnotacommand'
 # tests
 #
 def test_command_func(shell):
-    exit_command = cmdsh.modules.ExitCommand()
-    shell.load_module(exit_command)
+    shell.load_module(cmdsh.modules.ExitCommand)
     assert shell._command_func('exit')
 
 
@@ -67,8 +66,7 @@ def test_custom_prompt(shell):
 #
 def test_mocked_input(shell, mocker):
     """test typed input by mocking up the input call"""
-    exit_command = cmdsh.modules.ExitCommand()
-    shell.load_module(exit_command)
+    shell.load_module(cmdsh.modules.ExitCommand)
     mock_input = mocker.patch('builtins.input', return_value='exit')
     last_result = shell.loop()
     assert last_result.stop
@@ -87,8 +85,7 @@ def test_mocked_input_eof(shell, mocker):
 
 
 def test_empty_input_no_output(shell, capsys):
-    exit_command = cmdsh.modules.ExitCommand()
-    shell.load_module(exit_command)
+    shell.load_module(cmdsh.modules.ExitCommand)
     shell.cmdqueue.append('')
     shell.cmdqueue.append('exit')
     last_result = shell.loop()
@@ -111,8 +108,7 @@ def test_command_not_found_do(shell):
 
 
 def test_command_not_found_errmsg(shell, capsys):
-    exit_command = cmdsh.modules.ExitCommand()
-    shell.load_module(exit_command)
+    shell.load_module(cmdsh.modules.ExitCommand)
     shell.cmdqueue.append(INVALID_COMMAND)
     shell.cmdqueue.append('exit')
     shell.loop()
@@ -123,17 +119,20 @@ def test_command_not_found_errmsg(shell, capsys):
 #
 # test module loading behavior
 #
-def test_is_module_loaded(shell):
-    exit_command = cmdsh.modules.ExitCommand()
-    assert not shell.is_module_loaded(exit_command)
-    shell.load_module(exit_command)
-    assert shell.is_module_loaded(exit_command)
+def test_module_load_instance(shell):
+    assert not shell.is_module_loaded(cmdsh.modules.ExitCommand)
+    shell.load_module(cmdsh.modules.ExitCommand)
+    assert shell.is_module_loaded(cmdsh.modules.ExitCommand)
 
+
+def test_module_load_class(shell):
+    assert not shell.is_module_loaded(cmdsh.modules.ExitCommand)
+    shell.load_module(cmdsh.modules.ExitCommand)
+    assert shell.is_module_loaded(cmdsh.modules.ExitCommand)
 
 def test_modules_only_load_once(shell):
-    exit_command = cmdsh.modules.ExitCommand()
-    assert not shell.is_module_loaded(exit_command)
-    shell.load_module(exit_command)
-    assert shell.is_module_loaded(exit_command)
-    shell.load_module(exit_command)
-    assert shell._loaded_modules == [exit_command.__class__]
+    assert not shell.is_module_loaded(cmdsh.modules.ExitCommand)
+    shell.load_module(cmdsh.modules.ExitCommand)
+    assert shell.is_module_loaded(cmdsh.modules.ExitCommand)
+    shell.load_module(cmdsh.modules.ExitCommand)
+    assert shell._loaded_modules == [cmdsh.modules.ExitCommand]

@@ -47,8 +47,7 @@ def test_no_result():
 
 def test_default_result():
     drapp = DefaultResultApp()
-    drmod = cmdsh.modules.DefaultResult()
-    drapp.load_module(drmod)
+    drapp.load_module(cmdsh.modules.DefaultResult)
     result = drapp.do('say hello')
     assert result
     assert result.exit_code == 0
@@ -63,8 +62,7 @@ def test_exit_command():
     with pytest.raises(cmdsh.CommandNotFound):
         result = app.do('exit')
 
-    exit_command = cmdsh.modules.ExitCommand()
-    app.load_module(exit_command)
+    app.load_module(cmdsh.modules.ExitCommand)
     result = app.do('exit')
     assert result.exit_code == 0
     assert result.stop
