@@ -23,32 +23,36 @@
 #
 """Modules are dynamically loaded into an instantiated shell to add
 additional functionality.
+
+Modules can provide functionality in several ways:
+
+- bind module methods to an instance of the shell. For example, a module might
+  bind a "do_history" method to the shel.
+- create and manage a data store private to the module
+- register hooks with the shell
 """
 # pylint: disable=no-self-use
 
 import types
 
 from ..models import Statement, Result
-
+from ..utils import rebind_method
 
 class DefaultResult:
     """Create a default result if a do_command() method doesn't return one"""
-    allow_multiple_loads = False
-
     def load(self, shell):
         """Load and iniitalize this module"""
 
-        # this is the incantation that binds a method from an instance of
-        # the module to an instance of the shell
-        shell.default_result_hook = types.MethodType(self.default_result_hook.__func__, shell)
+        # bind our hook to the shell
+        rebind_method(self._default_result_hook, shell)
         # register the hook we just added to the shell
-        shell.register_postexecute_hook(shell.default_result_hook)
+        shell.register_postexecute_hook(shell._default_result_hook)
 
     #
-    # bound methods
+    # rebound methods
     #
     # these methods end up bound to the shell, not to the module
-    def default_result_hook(
+    def _default_result_hook(
             self,
             _statement: Statement,
             result: Result,
@@ -61,18 +65,41 @@ class DefaultResult:
 
 class ExitCommand:
     """Add an exit command to a shell"""
-    allow_multiple_loads = False
-
     def load(self, shell):
         """Load and initialize this module"""
-        # this is the incantation that binds a method from an instance of
-        # the module to an instance of the shell
-        shell.do_exit = types.MethodType(self.do_exit.__func__, shell)
+        # bind the command method to the shell
+        rebind_method(self.do_exit, shell)
 
     #
-    # bound methods
+    # rebound methods
     #
     # these methods end up bound to the shell, not to the module
     def do_exit(self, _statement: Statement) -> Result:
         """Exit the shell"""
         return Result(exit_code=0, stop=True)
+
+
+class History:
+    """Add a history of entered commands"""
+    def load(self, shell):
+        """Load and initialize this module"""
+        shell._history = []
+        # bind the hist command to the shell
+        rebind_method(self.do_hist, shell)
+        # bind the hook method to the shell
+        rebind_method(self._add_to_history, shell)
+        shell.register_postparse_hook(shell._add_to_history)
+
+    #
+    # rebound methods
+    #
+    # these methods end up bound to the shell, not to the module
+    def do_hist(self, statement: Statement) -> Result:
+        """Show the history"""
+        self.wout('\n'.join(self._history))
+        return Result(exit_code=0, stop=False)
+
+    def _add_to_history(self, statement: Statement) -> Statement:
+        """postparsing hook to add the statement to history"""
+        self._history.append(statement.raw)
+        return statement

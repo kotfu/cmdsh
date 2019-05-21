@@ -136,4 +136,4 @@ def test_modules_only_load_once(shell):
     shell.load_module(cmdsh.modules.ExitCommand)
     assert shell.is_module_loaded(cmdsh.modules.ExitCommand)
     shell.load_module(cmdsh.modules.ExitCommand)
-    assert shell._loaded_modules == [cmdsh.modules.ExitCommand]
+    assert list(shell._modules.keys()) == [cmdsh.modules.ExitCommand]

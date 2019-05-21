@@ -25,4 +25,4 @@
 The modules package includes
 """
 
-from .modules import DefaultResult, ExitCommand  # noqa F401
+from .modules import DefaultResult, ExitCommand, History  # noqa F401

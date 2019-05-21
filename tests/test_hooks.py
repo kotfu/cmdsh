@@ -40,7 +40,7 @@ class SayApp(cmdsh.Shell):
 
     def do_say(self, statement: cmdsh.Statement) -> cmdsh.Result:
         """Repeat back the arguments"""
-        self.wout(' '.join(statement.arglist))
+        self.wout('{}\n'.format(' '.join(statement.arglist)))
         return cmdsh.Result()
 
     ###
@@ -51,11 +51,11 @@ class SayApp(cmdsh.Shell):
     ###
     def prepost_hook_one(self) -> None:
         """Method used for preloop or postloop hooks"""
-        self.wout("one")
+        self.wout("one\n")
 
     def prepost_hook_two(self) -> None:
         """Another method used for preloop or postloop hooks"""
-        self.wout("two")
+        self.wout("two\n")
 
     def prepost_hook_too_many_parameters(self, param) -> None:
         """A preloop or postloop hook with too many parameters"""

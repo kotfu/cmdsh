@@ -66,3 +66,8 @@ def test_exit_command():
     result = app.do('exit')
     assert result.exit_code == 0
     assert result.stop
+
+
+#
+# History module
+#
