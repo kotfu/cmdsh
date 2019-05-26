@@ -4,44 +4,17 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
 #
 
+variables:
+  LINUX_IMAGE: 'ubuntu-16.04'
+  MACOS_IMAGE: 'macOS-10.14'
+  WINDOWS_IMAGE: 'win1803'
+
 trigger:
   - master
 
-parameters:
-  jobs: ['cmdsh testing']
-  pythons: ['3.5', '3.6', '3.7']
-  images: ['ubuntu-16.04', 'macOS-10.14', 'win1803']
-
 jobs:
-- job: 'cmdsh testing'
-  pool:
-    vmImage: 'ubuntu-16.04'
-
-  strategy:
-    matrix:
-      ${{ each job in parameters.jobs }}:
-        ${{ each py in parameters.pythons }}:
-          ${{ each os in parameters.images }}:
-            ${{ format('{0}{1}', py, os) }}:
-    maxParallel: 3
-
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(python.version)'
-      architecture: 'x64'
-
-  - script: python -m pip install --upgrade pip setuptools wheel
-    displayName: 'Upgrade pip and friends'
-
-  - script: pip install -e .[dev]
-    displayName: 'Install dev requirements'
-
-  - script: invoke pytest
-    displayName: 'pytest'
-
-
-- job: 'cmdsh code quality and documentation'
+- job: 'lint_docs'
+  displayName: 'Code Quality and Documentation'
   pool:
     vmImage: 'ubuntu-16.04'
 
@@ -65,3 +38,53 @@ jobs:
 
   - script: invoke docs
     displayName: 'Documentation'
+
+- job: 'pytest'
+  displayName: 'Test Suite'
+  strategy:
+    matrix:
+      linux_3.7:
+        image: $(LINUX_IMAGE)
+        python.version: '3.7'
+      linux_3.6:
+        image: $(LINUX_IMAGE)
+        python.version: '3.6'
+      linux_3.5:
+        image: $(LINUX_IMAGE)
+        python.version: '3.5'
+      macos_3.7:
+        image: $(MACOS_IMAGE)
+        python.version: '3.7'
+      macos_3.6:
+        image: $(MACOS_IMAGE)
+        python.version: '3.6'
+      macos_3.5:
+        image: $(MACOS_IMAGE)
+        python.version: '3.5'
+      windows_3.7:
+        image: $(WINDOWS_IMAGE)
+        python.version: '3.7'
+      windows_3.6:
+        image: $(WINDOWS_IMAGE)
+        python.version: '3.6'
+      windows_3.5:
+        image: $(WINDOWS_IMAGE)
+        python.version: '3.5'
+
+  pool:
+    vmImage: '$(image)'
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+      architecture: 'x64'
+
+  - script: python -m pip install --upgrade pip setuptools wheel
+    displayName: 'Upgrade pip and friends'
+
+  - script: pip install -e .[dev]
+    displayName: 'Install dev requirements'
+
+  - script: invoke pytest
+    displayName: 'pytest'
