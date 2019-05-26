@@ -43,36 +43,36 @@ jobs:
   displayName: 'Test Suite'
   strategy:
     matrix:
-      linux_3.7:
-        image: $(linux_image)
+      linux_37:
+        os.image: $(linux_image)
         python.version: '3.7'
-      linux_3.6:
-        image: $(linux_image)
+      linux_36:
+        os.image: $(linux_image)
         python.version: '3.6'
-      linux_3.5:
-        image: $(linux_image)
+      linux_35:
+        os.image: $(linux_image)
         python.version: '3.5'
-      macos_3.7:
-        image: $(macos_image)
+      macos_37:
+        os.image: $(macos_image)
         python.version: '3.7'
-      macos_3.6:
-        image: $(macos_image)
+      macos_36:
+        os.image: $(macos_image)
         python.version: '3.6'
-      macos_3.5:
-        image: $(macos_image)
+      macos_35:
+        os.image: $(macos_image)
         python.version: '3.5'
-      windows_3.7:
-        image: $(windows_image)
+      windows_37:
+        os.image: $(windows_image)
         python.version: '3.7'
-      windows_3.6:
-        image: $(windows_image)
+      windows_36:
+        os.image: $(windows_image)
         python.version: '3.6'
-      windows_3.5:
-        image: $(windows_image)
+      windows_35:
+        os.image: $(windows_image)
         python.version: '3.5'
 
   pool:
-    vmImage: '$(image)'
+    vmImage: $(os.image)
 
   steps:
   - task: UsePythonVersion@0
