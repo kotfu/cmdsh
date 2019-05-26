@@ -5,9 +5,9 @@
 #
 
 variables:
-  LINUX_IMAGE: 'ubuntu-16.04'
-  MACOS_IMAGE: 'macOS-10.14'
-  WINDOWS_IMAGE: 'win1803'
+  linux_image: ubuntu-16.04
+  macos_image: macOS-10.14
+  windows_image: win1803
 
 trigger:
   - master
@@ -44,31 +44,31 @@ jobs:
   strategy:
     matrix:
       linux_3.7:
-        image: '$(LINUX_IMAGE)'
+        image: $(linux_image)
         python.version: '3.7'
       linux_3.6:
-        image: '$(LINUX_IMAGE)'
+        image: $(linux_image)
         python.version: '3.6'
       linux_3.5:
-        image: '$(LINUX_IMAGE)'
+        image: $(linux_image)
         python.version: '3.5'
       macos_3.7:
-        image: '$(MACOS_IMAGE)'
+        image: $(macos_image)
         python.version: '3.7'
       macos_3.6:
-        image: '$(MACOS_IMAGE)'
+        image: $(macos_image)
         python.version: '3.6'
       macos_3.5:
-        image: '$(MACOS_IMAGE)'
+        image: $(macos_image)
         python.version: '3.5'
       windows_3.7:
-        image: '$(WINDOWS_IMAGE)'
+        image: $(windows_image)
         python.version: '3.7'
       windows_3.6:
-        image: '$(WINDOWS_IMAGE)'
+        image: $(windows_image)
         python.version: '3.6'
       windows_3.5:
-        image: '$(WINDOWS_IMAGE)'
+        image: $(windows_image)
         python.version: '3.5'
 
   pool:

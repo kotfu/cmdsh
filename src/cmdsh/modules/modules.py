@@ -66,10 +66,9 @@ Module Writing Conventions
 """
 # pylint: disable=no-self-use
 
-import types
-
 from ..models import Statement, Result
 from ..utils import rebind_method
+
 
 class DefaultResult:
     """Create a default result if a do_command() method doesn't return one"""
