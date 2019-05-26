@@ -4,18 +4,25 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
 #
 
+trigger:
+  - master
+
+parameters:
+  jobs: ['cmdsh testing']
+  pythons: ['3.5', '3.6', '3.7']
+  images: ['ubuntu-16.04', 'macOS-10.14', 'win1803']
+
 jobs:
-- job: 'Test'
+- job: 'cmdsh testing'
   pool:
     vmImage: 'ubuntu-16.04'
+
   strategy:
     matrix:
-      Python35:
-        python.version: '3.5'
-      Python36:
-        python.version: '3.6'
-      Python37:
-        python.version: '3.7'
+      ${{ each job in parameters.jobs }}:
+        ${{ each py in parameters.pythons }}:
+          ${{ each os in parameters.images }}:
+            ${{ format('{0}{1}', py, os) }}:
     maxParallel: 3
 
   steps:
@@ -31,5 +38,30 @@ jobs:
     displayName: 'Install dev requirements'
 
   - script: invoke pytest
-    displayName: 'Pytest'
+    displayName: 'pytest'
 
+
+- job: 'cmdsh code quality and documentation'
+  pool:
+    vmImage: 'ubuntu-16.04'
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.7'
+      architecture: 'x64'
+
+  - script: python -m pip install --upgrade pip setuptools wheel
+    displayName: 'Upgrade pip and friends'
+
+  - script: pip install -e .[dev]
+    displayName: 'Install dev requirements'
+
+  - script: invoke pylint
+    displayName: 'pylint'
+
+  - script: invoke flake8
+    displayName: 'flake8'
+
+  - script: invoke docs
+    displayName: 'Documentation'
