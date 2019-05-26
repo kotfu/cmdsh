@@ -57,13 +57,13 @@ jobs:
         os.image: 'macOS-10.14'
         python.version: '3.5'
       windows_37:
-        os.image: 'win1803'
+        os.image: 'windows-2019'
         python.version: '3.7'
       windows_36:
-        os.image: 'win1803'
+        os.image: 'windows-2019'
         python.version: '3.6'
       windows_35:
-        os.image: 'win1803'
+        os.image: 'windows-2019'
         python.version: '3.5'
 
   pool:
