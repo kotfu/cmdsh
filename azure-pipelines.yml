@@ -14,7 +14,7 @@ jobs:
         python.version: '3.5'
       Python36:
         python.version: '3.6'
-      Python37
+      Python37:
         python.version: '3.7'
     maxParallel: 3
 
