@@ -29,7 +29,7 @@ parser - a parser as defined in parsers.py
 
 """
 
-import types
+# import types
 
 from .parsers import SimpleParser
 from .modules import ExitCommand
@@ -57,6 +57,7 @@ class StandardLibraryPersonality:
 
 
         """
+        # pylint: disable=no-self-use
         shell.load_module(ExitCommand)
 
         # WARNING: dynamically binding in this way supercedes any methods
@@ -83,6 +84,7 @@ class StandardLibraryPersonality:
     #     # pylint: disable=no-member
     #     return '{}'.format(self.prompt)
 
+
 class SimplePersonality:
     """The simplest personality there is"""
     # pylint: disable=too-few-public-methods
@@ -91,3 +93,4 @@ class SimplePersonality:
 
     def bind(self, shell):
         """Method must be present for personality to bind, but this one is a noop"""
+        # pylint: disable=no-self-use

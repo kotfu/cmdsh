@@ -40,7 +40,7 @@ class SayApp(cmdsh.Shell):
 
     def do_say(self, statement: cmdsh.Statement) -> cmdsh.Result:
         """Repeat back the arguments"""
-        self.wout(' '.join(statement.arglist))
+        self.wout('{}\n'.format(' '.join(statement.arglist)))
         return cmdsh.Result()
 
     ###
@@ -51,11 +51,11 @@ class SayApp(cmdsh.Shell):
     ###
     def prepost_hook_one(self) -> None:
         """Method used for preloop or postloop hooks"""
-        self.wout("one")
+        self.wout("one\n")
 
     def prepost_hook_two(self) -> None:
         """Another method used for preloop or postloop hooks"""
-        self.wout("two")
+        self.wout("two\n")
 
     def prepost_hook_too_many_parameters(self, param) -> None:
         """A preloop or postloop hook with too many parameters"""
@@ -400,48 +400,3 @@ def test_register_postexecute_hook_no_return_annotation(sayapp):
 def test_register_postexecute_hook_wrong_return_annotation(sayapp):
     with pytest.raises(TypeError):
         sayapp.register_postexecute_hook(sayapp.postexecute_hook_wrong_return_annotation)
-
-    # ###
-    # #
-    # # command finalization hooks, some valid, some invalid
-    # #
-    # ###
-    # def cmdfinalization_hook(self, data: plugin.CommandFinalizationData) -> plugin.CommandFinalizationData:
-    #     """A command finalization hook."""
-    #     self.called_cmdfinalization += 1
-    #     return data
-
-    # def cmdfinalization_hook_stop(self, data: cmd2.plugin.CommandFinalizationData) -> cmd2.plugin.CommandFinalizationData:
-    #     """A postparsing hook which requests application exit"""
-    #     self.called_cmdfinalization += 1
-    #     data.stop = True
-    #     return data
-
-    # def cmdfinalization_hook_exception(self, data: cmd2.plugin.CommandFinalizationData) -> cmd2.plugin.CommandFinalizationData:
-    #     """A postparsing hook which raises an exception"""
-    #     self.called_cmdfinalization += 1
-    #     raise ValueError
-
-    # def cmdfinalization_hook_not_enough_parameters(self) -> plugin.CommandFinalizationData:
-    #     """A command finalization hook with no parameters."""
-    #     pass
-
-    # def cmdfinalization_hook_too_many_parameters(self, one: plugin.CommandFinalizationData, two: str) -> plugin.CommandFinalizationData:
-    #     """A command finalization hook with too many parameters."""
-    #     return one
-
-    # def cmdfinalization_hook_no_parameter_annotation(self, data) -> plugin.CommandFinalizationData:
-    #     """A command finalization hook with no type annotation on the parameter."""
-    #     return data
-
-    # def cmdfinalization_hook_wrong_parameter_annotation(self, data: str) -> plugin.CommandFinalizationData:
-    #     """A command finalization hook with the incorrect type annotation on the parameter."""
-    #     return data
-
-    # def cmdfinalization_hook_no_return_annotation(self, data: plugin.CommandFinalizationData):
-    #     """A command finalizationhook with no type annotation on the return value."""
-    #     return data
-
-    # def cmdfinalization_hook_wrong_return_annotation(self, data: plugin.CommandFinalizationData) -> cmd2.Statement:
-    #     """A command finalization hook with the wrong return type annotation."""
-    #     return self.statement_parser.parse('hi there')

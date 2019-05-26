@@ -65,7 +65,7 @@ class Shell:
         self._postloop_hooks = []
         self._postparse_hooks = []
         self._postexecute_hooks = []
-        self._loaded_modules = []
+        self._modules = {}
 
         # public attributes get sensible defaults
         self.cmdqueue = []
@@ -81,9 +81,6 @@ class Shell:
         Returns the result of the last command
         """
 
-        # set a default result in case we exit before generating an actual result
-        result = Result(exit_code=0, stop=True)
-
         # run all the registered preloop hooks
         for func in self._preloop_hooks:
             func()
@@ -97,7 +94,11 @@ class Shell:
                 try:
                     line = input(self.render_prompt())
                 except EOFError:
-                    break
+                    result = self.eof()
+                    if result.stop:
+                        break
+                    else:
+                        continue
 
             if line == '':
                 continue
@@ -108,7 +109,7 @@ class Shell:
                 if result.stop:
                     break
             except CommandNotFound as err:
-                self.werr("{}: command not found".format(err.statement.command))
+                self.werr("{}: command not found\n".format(err.statement.command))
 
         # run all the registered postloop hooks
         for func in self._postloop_hooks:
@@ -122,6 +123,9 @@ class Shell:
         Raises any exceptions thrown by hook methods or by the command function
         """
         # pylint: disable=invalid-name
+
+        # for func in self._preparse_hooks:
+        #     line = func(line)
 
         statement = self._personality.parser.parse(line)
         for func in self._postparse_hooks:
@@ -162,7 +166,7 @@ class Shell:
             klass = module
         else:
             klass = module.__class__
-        return klass in self._loaded_modules
+        return klass in self._modules.keys()
 
     def load_module(self, module: Any) -> None:
         """Load an instantiated module object
@@ -173,7 +177,7 @@ class Shell:
             module = module()
         if not self.is_module_loaded(module):
             module.load(self)
-            self._loaded_modules.append(module.__class__)
+            self._modules[module.__class__] = module
 
     #
     # hooks
@@ -211,17 +215,35 @@ class Shell:
     def wout(self, data: str) -> None:
         """write data to stdout"""
         # pylint: disable=no-self-use
-        sys.stdout.write('{}\n'.format(data))
+        sys.stdout.write(data)
 
     def werr(self, data: str) -> None:
         """write data to stderr"""
         # pylint: disable=no-self-use
-        sys.stderr.write('{}\n'.format(data))
+        sys.stderr.write(data)
 
     def render_prompt(self) -> str:
         """Generate the prompt which is displayed before user input.
 
         Rather than access the prompt attribute directly, we call this method so that
-        subclasses or personalities can over-ride it to create a dynamic prompt.
+        subclasses, modules, or personalities can over-ride it to create a dynamic prompt.
         """
         return self.prompt
+
+    #
+    # behaviors - a personality or module may over-ride these methods
+    # to customize the behavior of the shell
+    #
+    def eof(self) -> Optional[Result]:
+        """This method is called when and end of file is encountered.
+
+        If you choose to over-ride this method, you need to consider behavior when
+        input is a tty and when it is not. If you don't exit when input isn't a tty,
+        the shell will hang when piped input runs out.
+        """
+        if sys.stdin.isatty():
+            result = Result(exit_code=0, stop=False)
+            self.wout('\n')
+        else:
+            result = Result(exit_code=0, stop=True)
+        return result

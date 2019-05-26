@@ -20,54 +20,5 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-#
-import pytest
 
-import cmdsh
-
-
-#
-# DefaultResult module
-#
-class DefaultResultApp(cmdsh.Shell):
-    """A simple app to rest the DefaultResult module"""
-
-    def do_say(self, statement: cmdsh.Statement) -> cmdsh.Result:
-        """Repeat back the arguments"""
-        self.wout(' '.join(statement.arglist))
-        # don't return anything here
-        # we want to see if the module will do it for us
-
-
-def test_no_result():
-    drapp = DefaultResultApp()
-    result = drapp.do('say hello')
-    assert result is None
-
-
-def test_default_result():
-    drapp = DefaultResultApp()
-    drapp.load_module(cmdsh.modules.DefaultResult)
-    result = drapp.do('say hello')
-    assert result
-    assert result.exit_code == 0
-    assert not result.stop
-
-
-#
-# ExitCommand module
-#
-def test_exit_command():
-    app = cmdsh.Shell()
-    with pytest.raises(cmdsh.CommandNotFound):
-        result = app.do('exit')
-
-    app.load_module(cmdsh.modules.ExitCommand)
-    result = app.do('exit')
-    assert result.exit_code == 0
-    assert result.stop
-
-
-#
-# History module
-#
+# TODO test all functions in utils
