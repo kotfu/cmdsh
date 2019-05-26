@@ -92,8 +92,8 @@ def rebind_method(method, obj) -> None:
     #
     #     obj.method_name = types.MethodType(self.method_name.__func__, obj)
     #
-    #
-
+    # TODO add force keyword parameter which defaults to false. If false, raise an
+    # exception if the method already exists on obj
     method_name = method.__name__
     setattr(obj, method_name, types.MethodType(method.__func__, obj))
 
@@ -124,3 +124,6 @@ def bind_function(func, obj) -> None:
     #
     func_name = func.__name__
     setattr(obj, func_name, types.MethodType(func, obj))
+
+
+# TODO write bind_attribute()

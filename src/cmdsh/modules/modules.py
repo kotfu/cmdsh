@@ -30,6 +30,39 @@ Modules can provide functionality in several ways:
   bind a "do_history" method to the shel.
 - create and manage a data store private to the module
 - register hooks with the shell
+
+A module can be any object that has a ``load(self, shell)`` method.
+When you request the shell to load some object as a module, it calls the load
+method on that object.
+
+Module Writing Conventions
+--------------------------
+
+- When adding attributes to the shell, prefix them with an underscore and the
+  name of your module. This is bad:
+
+      shell.histfile = []
+
+  This is good:
+
+      shell._history_file
+
+
+- Use the bind_attribute() function to hook the attribute to the shell, it has
+  the benefit of raising an exception if the attribute already exists. This
+  prevents collisions between modules who want to use the same attribute naame
+
+
+- When defining methods which will be bound to the shell to be registered as
+  hooks, prefix them with an underscore and the name of your module. This is
+  bad:
+
+      def result_hook():
+
+  This is good:
+
+      def _default_result_hook():
+
 """
 # pylint: disable=no-self-use
 
@@ -52,6 +85,8 @@ class DefaultResult:
     # rebound methods
     #
     # these methods end up bound to the shell, not to the module
+    # that means `self` references the shell object, not the module
+    # object
     def _default_result_hook(
             self,
             _statement: Statement,
@@ -74,6 +109,8 @@ class ExitCommand:
     # rebound methods
     #
     # these methods end up bound to the shell, not to the module
+    # that means `self` references the shell object, not the module
+    # object
     def do_exit(self, _statement: Statement) -> Result:
         """Exit the shell"""
         return Result(exit_code=0, stop=True)
@@ -81,9 +118,14 @@ class ExitCommand:
 
 class History:
     """Add a history of entered commands"""
+    def __init__(self, file="history.txt"):
+        self._history_file = file
+
     def load(self, shell):
         """Load and initialize this module"""
         shell._history = []
+        shell._history_file = self._history_file
+
         # bind the hist command to the shell
         rebind_method(self.do_hist, shell)
         # bind the hook method to the shell
@@ -94,6 +136,8 @@ class History:
     # rebound methods
     #
     # these methods end up bound to the shell, not to the module
+    # that means `self` references the shell object, not the module
+    # object
     def do_hist(self, statement: Statement) -> Result:
         """Show the history"""
         self.wout('\n'.join(self._history))
