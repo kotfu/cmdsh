@@ -4,11 +4,6 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
 #
 
-variables:
-  linux_image: ubuntu-16.04
-  macos_image: macOS-10.14
-  windows_image: win1803
-
 trigger:
   - master
 
@@ -44,31 +39,31 @@ jobs:
   strategy:
     matrix:
       linux_37:
-        os.image: $(linux_image)
+        os.image: 'ubuntu-16.04'
         python.version: '3.7'
       linux_36:
-        os.image: $(linux_image)
+        os.image: 'ubuntu-16.04'
         python.version: '3.6'
       linux_35:
-        os.image: $(linux_image)
+        os.image: 'ubuntu-16.04'
         python.version: '3.5'
       macos_37:
-        os.image: $(macos_image)
+        os.image: 'macOS-10.14'
         python.version: '3.7'
       macos_36:
-        os.image: $(macos_image)
+        os.image: 'macOS-10.14'
         python.version: '3.6'
       macos_35:
-        os.image: $(macos_image)
+        os.image: 'macOS-10.14'
         python.version: '3.5'
       windows_37:
-        os.image: $(windows_image)
+        os.image: 'win1803'
         python.version: '3.7'
       windows_36:
-        os.image: $(windows_image)
+        os.image: 'win1803'
         python.version: '3.6'
       windows_35:
-        os.image: $(windows_image)
+        os.image: 'win1803'
         python.version: '3.5'
 
   pool:
