@@ -27,13 +27,15 @@ import cmdsh
 
 def test_simple_parser():
     parser = cmdsh.parsers.SimpleParser()
-    statement = parser.parse('command arg1 arg2 arg3')
-    assert statement.command == 'command'
-    assert statement.arglist == ['arg1', 'arg2', 'arg3']
+    stmt = cmdsh.Statement('command arg1 arg2 arg3')
+    stmt = parser.parse(stmt)
+    assert stmt.command == 'command'
+    assert stmt.arglist == ['arg1', 'arg2', 'arg3']
 
 
 def test_posix_parser():
     parser = cmdsh.parsers.PosixShellParser()
-    statement = parser.parse('command "arg1 arg2" arg3 # not args')
-    assert statement.command == 'command'
-    assert statement.arglist == ['arg1 arg2', 'arg3']
+    stmt = cmdsh.Statement('command "arg1 arg2" arg3 # not args')
+    stmt = parser.parse(stmt)
+    assert stmt.command == 'command'
+    assert stmt.arglist == ['arg1 arg2', 'arg3']

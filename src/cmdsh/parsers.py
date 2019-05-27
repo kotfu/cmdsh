@@ -25,8 +25,15 @@
 
 You can use any class as a parser, as long is it implements the following methods:
 
-parse(self, line: str) -> Statement
+parse(self, statement: Statement) -> Statement
 
+The statement object passed into the parse method will only have the ``.raw``
+attribute set. The parse method must parse that line and return a new statement
+object with both ``.raw`` and ``.argv`` attributes set. ``.argv`` is a list
+of arguments similar to ``sys.argv``.
+
+Any exceptions thrown by the parse method prevent the shell from executing
+the statement.
 """
 # pylint: disable=no-self-use
 
@@ -41,14 +48,10 @@ class SimpleParser:
     Quoted arguments are properly handled
     """
     # pylint: disable=too-few-public-methods
-    def parse(self, line: str) -> Statement:
+    def parse(self, stmt: Statement) -> Statement:
         """Split the input on whitespace"""
-        argv = list(shlex.shlex(line, posix=False))
-        statement = Statement(
-            raw=line,
-            argv=argv
-        )
-        return statement
+        stmt.argv = list(shlex.shlex(stmt.raw, posix=False))
+        return stmt
 
 
 class PosixShellParser:
@@ -60,11 +63,7 @@ class PosixShellParser:
     - Everything after an unquoted/unescaped # is treated as a comment
     """
     # pylint: disable=too-few-public-methods
-    def parse(self, line: str) -> Statement:
+    def parse(self, stmt: Statement) -> Statement:
         """Posix split the input"""
-        argv = list(shlex.shlex(line, posix=True, punctuation_chars=True))
-        statement = Statement(
-            raw=line,
-            argv=argv
-        )
-        return statement
+        stmt.argv = list(shlex.shlex(stmt.raw, posix=True, punctuation_chars=True))
+        return stmt

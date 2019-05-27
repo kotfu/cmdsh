@@ -35,7 +35,7 @@ import sys
 from typing import Any, Callable, Optional
 
 from . import utils
-from .models import Statement, Result, CommandNotFound
+from .models import Statement, Result, Record, CommandNotFound
 from .personalities import SimplePersonality
 
 
@@ -45,17 +45,23 @@ class Shell:
 
     Attributes:
 
-    cmdqueue
-        a list of commands. The cmdloop pops items from this list before reading
-        stdin parser the parser class to use to parse input into a Statement object
+    input_queue
+        a list of input, as if it came from the user. The cmdloop pops items
+        from this list before reading stdin parser the parser class to use
+        to parse input into a Statement object
 
     prompt
         a static prompt to output before accepting user input
 
-    Methods and attributes on this class which don't start with an underscore are
-    considered part of the public api of this class. Changes to these methods and
-    attributes are reflected in the version number according to `Semantic Versioning
-    <https://semver.org>`_.
+    Methods:
+
+    eof()
+        Called when the end of the input stream is reached.
+
+
+    Methods and attributes on this class which don't start with an underscore are considered part of
+    the public api of this class. Changes to these methods and attributes are reflected in the
+    version number according to `Semantic Versioning <https://semver.org>`_.
 
     """
 
@@ -68,7 +74,8 @@ class Shell:
         self._modules = {}
 
         # public attributes get sensible defaults
-        self.cmdqueue = []
+        self.input_queue = []
+        self.history = []
         self.prompt = 'cmdsh: '
 
         # set and bind the personality
@@ -87,9 +94,9 @@ class Shell:
 
         # enter the command loop
         while True:
-            if self.cmdqueue:
+            if self.input_queue:
                 # we have enqueued commands, use the first one
-                line = self.cmdqueue.pop(0)
+                line = self.input_queue.pop(0)
             else:
                 try:
                     line = input(self.render_prompt())
@@ -127,19 +134,24 @@ class Shell:
         # for func in self._preparse_hooks:
         #     line = func(line)
 
-        statement = self._personality.parser.parse(line)
+        stmt = Statement(line)
+        stmt = self._personality.parser.parse(stmt)
         for func in self._postparse_hooks:
-            statement = func(statement)
+            stmt = func(stmt)
 
-        func = self._command_func(statement.command)
+        record = Record(statement=stmt)
+
+        func = self._command_func(stmt.command)
         if func:
-            result = func(statement)
+            result = func(stmt)
 
             for func in self._postexecute_hooks:
-                result = func(statement, result)
+                result = func(stmt, result)
+
+            self.history.append(record)
 
             return result
-        raise CommandNotFound(statement)
+        raise CommandNotFound(stmt)
 
     def _command_func(self, command: str) -> Optional[Callable]:
         """Find the function to call for a given command"""

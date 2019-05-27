@@ -86,8 +86,8 @@ def test_mocked_input_eof(shell, mocker):
 
 def test_empty_input_no_output(shell, capsys):
     shell.load_module(cmdsh.modules.ExitCommand)
-    shell.cmdqueue.append('')
-    shell.cmdqueue.append('exit')
+    shell.input_queue.append('')
+    shell.input_queue.append('exit')
     last_result = shell.loop()
     out, err = capsys.readouterr()
     assert not out
@@ -109,8 +109,8 @@ def test_command_not_found_do(shell):
 
 def test_command_not_found_errmsg(shell, capsys):
     shell.load_module(cmdsh.modules.ExitCommand)
-    shell.cmdqueue.append(INVALID_COMMAND)
-    shell.cmdqueue.append('exit')
+    shell.input_queue.append(INVALID_COMMAND)
+    shell.input_queue.append('exit')
     shell.loop()
     out, err = capsys.readouterr()
     assert 'command not found' in err

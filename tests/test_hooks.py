@@ -200,8 +200,8 @@ def sayapp():
 ###
 def test_preloop_hook(sayapp, capsys):
     sayapp.register_preloop_hook(sayapp.prepost_hook_one)
-    sayapp.cmdqueue.append('say hello')
-    sayapp.cmdqueue.append('exit')
+    sayapp.input_queue.append('say hello')
+    sayapp.input_queue.append('exit')
     sayapp.loop()
     out, err = capsys.readouterr()
     assert out == 'one\nhello\n'
@@ -211,8 +211,8 @@ def test_preloop_hook(sayapp, capsys):
 def test_preloop_hooks(sayapp, capsys):
     sayapp.register_preloop_hook(sayapp.prepost_hook_one)
     sayapp.register_preloop_hook(sayapp.prepost_hook_two)
-    sayapp.cmdqueue.append('say hello')
-    sayapp.cmdqueue.append('exit')
+    sayapp.input_queue.append('say hello')
+    sayapp.input_queue.append('exit')
     sayapp.loop()
     out, err = capsys.readouterr()
     assert out == 'one\ntwo\nhello\n'
@@ -241,8 +241,8 @@ def test_preloop_hook_no_return_annotation(sayapp):
 ###
 def test_postloop_hook(sayapp, capsys):
     sayapp.register_postloop_hook(sayapp.prepost_hook_one)
-    sayapp.cmdqueue.append('say hello')
-    sayapp.cmdqueue.append('exit')
+    sayapp.input_queue.append('say hello')
+    sayapp.input_queue.append('exit')
     sayapp.loop()
     out, err = capsys.readouterr()
     assert out == 'hello\none\n'
@@ -252,8 +252,8 @@ def test_postloop_hook(sayapp, capsys):
 def test_postloop_hooks(sayapp, capsys):
     sayapp.register_postloop_hook(sayapp.prepost_hook_one)
     sayapp.register_postloop_hook(sayapp.prepost_hook_two)
-    sayapp.cmdqueue.append('say hello')
-    sayapp.cmdqueue.append('exit')
+    sayapp.input_queue.append('say hello')
+    sayapp.input_queue.append('exit')
     sayapp.loop()
     out, err = capsys.readouterr()
     assert out == 'hello\none\ntwo\n'

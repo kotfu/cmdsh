@@ -28,8 +28,8 @@ from typing import List
 import attr
 
 
-@attr.s(frozen=True)
-class Statement():
+@attr.s
+class Statement:
     """The result of parsing user input
 
     Instances of this class are created by ``StatementParser.parse()`` methods. These
@@ -76,8 +76,8 @@ class Statement():
         return self.argv[1:]
 
 
-@attr.s(frozen=True)
-class Result():
+@attr.s
+class Result:
     """The result of running a command
 
     The default result has an exit_code of 0 (indicating no errors or success), and stop
@@ -86,6 +86,16 @@ class Result():
     # pylint: disable=too-few-public-methods
     exit_code = attr.ib(default=0, validator=attr.validators.instance_of(int))
     stop = attr.ib(default=False, validator=attr.validators.instance_of(bool))
+
+
+@attr.s
+class Record:
+    """
+    A record of a statement and it's result
+
+    """
+    statement = attr.ib(default=None)
+    result = attr.ib(default=None)
 
 
 class CommandNotFound(Exception):
