@@ -1,5 +1,6 @@
+***********
 Terminology
-===========
+***********
 
 Here's the terminology and definition used in this project
 
@@ -18,3 +19,10 @@ Arguments
   Everything the user entered after the command. This includes positional arguments
   and command-line options, i.e. '--test'
 
+Result
+
+  The result of executing a statement.
+
+Record
+
+  A record of a statement and it's associated result
